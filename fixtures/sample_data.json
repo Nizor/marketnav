@@ -1,0 +1,384 @@
+[
+  {
+    "model": "markets.market",
+    "pk": 1,
+    "fields": {
+      "name": "Balogun Market",
+      "slug": "balogun-market-lagos",
+      "city": "Lagos",
+      "state": "Lagos",
+      "description": "One of the largest open markets in West Africa, located on Lagos Island. Known for fabrics, electronics, and foodstuffs.",
+      "address": "Balogun Street, Lagos Island, Lagos",
+      "map_image": "",
+      "map_width": 1200,
+      "map_height": 900,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 1,
+    "fields": {
+      "market": 1,
+      "name": "Fabrics Section",
+      "code": "FAB",
+      "description": "Ankara, lace, and general fabrics.",
+      "color_hex": "#AED6F1",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 2,
+    "fields": {
+      "market": 1,
+      "name": "Electronics Aisle",
+      "code": "ELEC",
+      "description": "Phones, accessories, and consumer electronics.",
+      "color_hex": "#A9DFBF",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 3,
+    "fields": {
+      "market": 1,
+      "name": "Foodstuffs Section",
+      "code": "FOOD",
+      "description": "Grains, spices, and dry goods.",
+      "color_hex": "#FAD7A0",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 1,
+    "fields": {
+      "market": 1,
+      "zone": null,
+      "qr_id": "aaaaaaaa-0001-0001-0001-aaaaaaaaaaaa",
+      "label": "Main Entrance",
+      "node_type": "entrance",
+      "x": 600.0,
+      "y": 900.0,
+      "qr_image": "",
+      "description": "Primary entrance from Balogun Street.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 2,
+    "fields": {
+      "market": 1,
+      "zone": null,
+      "qr_id": "aaaaaaaa-0002-0002-0002-aaaaaaaaaaaa",
+      "label": "Junction A",
+      "node_type": "intersection",
+      "x": 600.0,
+      "y": 750.0,
+      "qr_image": "",
+      "description": "Central crossroads — north leads to Fabrics, east to Electronics.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 3,
+    "fields": {
+      "market": 1,
+      "zone": 1,
+      "qr_id": "aaaaaaaa-0003-0003-0003-aaaaaaaaaaaa",
+      "label": "Stall F-01",
+      "node_type": "stall",
+      "x": 300.0,
+      "y": 600.0,
+      "qr_image": "",
+      "description": "Fabrics section, row 1.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 4,
+    "fields": {
+      "market": 1,
+      "zone": 1,
+      "qr_id": "aaaaaaaa-0004-0004-0004-aaaaaaaaaaaa",
+      "label": "Stall F-02",
+      "node_type": "stall",
+      "x": 300.0,
+      "y": 500.0,
+      "qr_image": "",
+      "description": "Fabrics section, row 2.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 5,
+    "fields": {
+      "market": 1,
+      "zone": 2,
+      "qr_id": "aaaaaaaa-0005-0005-0005-aaaaaaaaaaaa",
+      "label": "Stall E-01",
+      "node_type": "stall",
+      "x": 900.0,
+      "y": 600.0,
+      "qr_image": "",
+      "description": "Electronics section, row 1.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 6,
+    "fields": {
+      "market": 1,
+      "zone": 3,
+      "qr_id": "aaaaaaaa-0006-0006-0006-aaaaaaaaaaaa",
+      "label": "Stall G-01",
+      "node_type": "stall",
+      "x": 600.0,
+      "y": 300.0,
+      "qr_image": "",
+      "description": "Foodstuffs section, row 1.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 7,
+    "fields": {
+      "market": 1,
+      "zone": null,
+      "qr_id": "aaaaaaaa-0007-0007-0007-aaaaaaaaaaaa",
+      "label": "Junction B",
+      "node_type": "intersection",
+      "x": 600.0,
+      "y": 450.0,
+      "qr_image": "",
+      "description": "Second crossroads — leads to Foodstuffs.",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.edge",
+    "pk": 1,
+    "fields": {"market": 1, "node_from": 1, "node_to": 2, "weight": 15.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 2,
+    "fields": {"market": 1, "node_from": 2, "node_to": 3, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 3,
+    "fields": {"market": 1, "node_from": 2, "node_to": 5, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 4,
+    "fields": {"market": 1, "node_from": 3, "node_to": 4, "weight": 10.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 5,
+    "fields": {"market": 1, "node_from": 2, "node_to": 7, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 6,
+    "fields": {"market": 1, "node_from": 7, "node_to": 6, "weight": 15.0, "is_active": true}
+  },
+  {
+    "model": "vendors.productcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Fabrics & Textiles",
+      "icon": "🧵",
+      "description": "Ankara, lace, brocade, and general fabrics.",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.productcategory",
+    "pk": 2,
+    "fields": {
+      "name": "Electronics & Accessories",
+      "icon": "📱",
+      "description": "Phones, chargers, earphones, and consumer electronics.",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.productcategory",
+    "pk": 3,
+    "fields": {
+      "name": "Foodstuffs & Grains",
+      "icon": "🌾",
+      "description": "Rice, beans, spices, and dry goods.",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.productcategory",
+    "pk": 4,
+    "fields": {
+      "name": "Fashion & Clothing",
+      "icon": "👗",
+      "description": "Ready-made garments and traditional attire.",
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.vendor",
+    "pk": 1,
+    "fields": {
+      "user": null,
+      "node": 3,
+      "market": 1,
+      "business_name": "Amaka Fabrics",
+      "owner_name": "Amaka Okafor",
+      "description": "Premium Ankara and lace fabrics, wholesale and retail.",
+      "phone": "+2348012345678",
+      "whatsapp": "+2348012345678",
+      "email": "amaka@example.com",
+      "categories": [1],
+      "logo": "",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.vendor",
+    "pk": 2,
+    "fields": {
+      "user": null,
+      "node": 5,
+      "market": 1,
+      "business_name": "TechHub Lagos",
+      "owner_name": "Emeka Eze",
+      "description": "Phones, accessories, and screen repairs.",
+      "phone": "+2348098765432",
+      "whatsapp": "+2348098765432",
+      "email": "",
+      "categories": [2],
+      "logo": "",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.vendor",
+    "pk": 3,
+    "fields": {
+      "user": null,
+      "node": 6,
+      "market": 1,
+      "business_name": "Mama Ngozi Grains",
+      "owner_name": "Ngozi Adeyemi",
+      "description": "Fresh local rice, beans, garri, and assorted spices.",
+      "phone": "+2348055512345",
+      "whatsapp": "+2348055512345",
+      "email": "",
+      "categories": [3],
+      "logo": "",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 1,
+    "fields": {
+      "vendor": 1, "category": 1,
+      "name": "Ankara (6 yards)",
+      "description": "Quality wax print Ankara fabric, 6-yard piece.",
+      "price": "4500.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 2,
+    "fields": {
+      "vendor": 1, "category": 1,
+      "name": "French Lace (5 yards)",
+      "description": "Premium French lace, assorted colours.",
+      "price": "18000.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 3,
+    "fields": {
+      "vendor": 2, "category": 2,
+      "name": "Tecno Spark 20 Pro",
+      "description": "Brand new, sealed, 1-year warranty.",
+      "price": "185000.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 4,
+    "fields": {
+      "vendor": 2, "category": 2,
+      "name": "USB-C Fast Charger",
+      "description": "65W fast charger, compatible with most Android phones.",
+      "price": "3500.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 5,
+    "fields": {
+      "vendor": 3, "category": 3,
+      "name": "Local Rice (50kg bag)",
+      "description": "Ofada rice, freshly milled.",
+      "price": "42000.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "vendors.product",
+    "pk": 6,
+    "fields": {
+      "vendor": 3, "category": 3,
+      "name": "Honey Beans (10kg)",
+      "description": "Sorted and cleaned honey beans.",
+      "price": "9500.00", "is_available": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    }
+  }
+]

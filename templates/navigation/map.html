@@ -1,0 +1,630 @@
+{% extends "base.html" %}
+
+{% block title %}Map — {{ market.name }}{% endblock %}
+
+{% block nav_right %}
+<a href="{% if from_node %}{% url 'node-scan-web' from_node.qr_id %}{% else %}{% url 'landing' %}{% endif %}" class="nav-back">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+  </svg>
+  Back
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { overflow: hidden; }
+  main { display: flex; flex-direction: column; height: calc(100dvh - 56px); }
+
+  #map-container {
+    flex: 1; position: relative; overflow: hidden;
+    background: var(--bg2); touch-action: none;
+  }
+  #map-svg {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    cursor: grab; user-select: none;
+  }
+  #map-svg:active { cursor: grabbing; }
+
+  /* ── Edges ── */
+  .edge-bg { stroke: rgba(255,255,255,0.07); stroke-width: 14; stroke-linecap: round; }
+
+  /* ── Route layers (Google Maps style) ── */
+  #route-shadow { stroke: rgba(0,0,0,0.35);    stroke-width: 22; stroke-linecap: round; fill: none; display: none; }
+  #route-glow   { stroke: rgba(255,59,48,0.25); stroke-width: 26; stroke-linecap: round; fill: none; display: none; }
+  #route-solid  { stroke: #FF3B30;              stroke-width: 11; stroke-linecap: round; fill: none; display: none; }
+  #route-arrow  {
+    stroke: rgba(255,255,255,0.7); stroke-width: 3; fill: none;
+    stroke-linecap: round; stroke-dasharray: 6 14; display: none;
+    animation: flowArrow 0.7s linear infinite;
+  }
+  @keyframes flowArrow { to { stroke-dashoffset: -20; } }
+  #route-shadow.on, #route-glow.on, #route-solid.on, #route-arrow.on { display: block; }
+
+  /* ── Nodes ── */
+  .node-hit { fill: transparent; cursor: pointer; }
+
+  .n-stall-bg    { fill: rgba(255,255,255,0.13); }
+  .n-junction-bg { fill: rgba(255,255,255,0.05); }
+  .n-entrance-bg { fill: rgba(46,204,113,0.2);   }
+  .n-stall-dot    { fill: rgba(255,255,255,0.55); }
+  .n-junction-dot { fill: rgba(255,255,255,0.22); }
+  .n-entrance-dot { fill: #2ECC71; }
+
+  .node-lbl {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; fill: rgba(255,255,255,0.45); pointer-events: none;
+  }
+  .lbl-start { fill: #F5A623 !important; font-weight: 700; }
+  .lbl-dest  { fill: #FF3B30 !important; font-weight: 700; }
+
+  /* ── Start marker (orange pulsing) ── */
+  #start-marker { pointer-events: none; display: none; }
+  .sm-pulse { fill: rgba(245,166,35,0.12); animation: smPulse 2s ease infinite; }
+  .sm-ring  { fill: rgba(245,166,35,0.22); }
+  .sm-dot   { fill: #F5A623; }
+  .sm-core  { fill: #0A1628; }
+  @keyframes smPulse { 0%,100%{ r:34;opacity:.5; } 50%{ r:44;opacity:0; } }
+
+  /* ── Destination marker (red pin) ── */
+  #dest-marker { pointer-events: none; display: none; }
+  .dm-pulse { fill: rgba(255,59,48,0.12); animation: dmPulse 1.4s ease infinite; }
+  .dm-ring  { fill: rgba(255,59,48,0.22); }
+  .dm-dot   { fill: #FF3B30; }
+  .dm-core  { fill: white; }
+  @keyframes dmPulse { 0%,100%{ r:30;opacity:.6; } 50%{ r:40;opacity:0; } }
+
+  /* ── Zoom controls ── */
+  .zoom-wrap {
+    position: absolute; top: 12px; right: 12px; z-index: 10;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .zoom-btn {
+    width: 38px; height: 38px;
+    background: rgba(10,22,40,0.92); backdrop-filter: blur(8px);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 1.3rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .zoom-btn:hover { background: var(--surface); }
+
+  /* ── Legend ── */
+  .legend {
+    position: absolute; top: 12px; left: 12px; z-index: 10;
+    background: rgba(10,22,40,0.92); backdrop-filter: blur(8px);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 0.7rem; color: var(--muted);
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .li { display: flex; align-items: center; gap: 7px; }
+  .ld { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Floating hint pill ── */
+  #hint-pill {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: rgba(10,22,40,0.92); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-radius: 100px;
+    padding: 9px 20px; font-size: 0.8rem; color: var(--muted);
+    white-space: nowrap; z-index: 10; pointer-events: none;
+    transition: opacity .25s;
+  }
+  #hint-pill.gone { opacity: 0; }
+
+  /* ── Node tooltip (bottom sheet) ── */
+  #tooltip {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 30;
+    background: rgba(9,18,33,0.97); backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border);
+    padding: 16px 20px 24px;
+    transform: translateY(102%);
+    transition: transform .28s cubic-bezier(.34,1.4,.64,1);
+  }
+  #tooltip.open { transform: translateY(0); }
+  .tt-name { font-family: var(--ff-display); font-size: 1.1rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 3px; }
+  .tt-meta { font-size: .8rem; color: var(--muted); margin-bottom: 14px; }
+  .tt-row  { display: flex; gap: 8px; }
+  .tt-btn  {
+    flex: 1; padding: 13px 10px; border-radius: 10px; border: none;
+    cursor: pointer; font-family: var(--ff-body); font-size: .88rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all .15s; text-decoration: none;
+  }
+  .tt-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .tt-primary { background: #FF3B30; color: #fff; }
+  .tt-primary:hover { background: #d93228; }
+  .tt-amber { background: rgba(245,166,35,.14); color: var(--accent); border: 1px solid rgba(245,166,35,.3); }
+  .tt-amber:hover { background: rgba(245,166,35,.24); }
+  .tt-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .tt-ghost:hover { background: var(--surface); }
+
+  /* ── Nav mode banner ── */
+  #nav-banner {
+    display: none; align-items: center; gap: 12px;
+    padding: 13px 20px;
+    background: linear-gradient(90deg, #FF3B30, #FF6B35);
+  }
+  #nav-banner.on { display: flex; }
+  .nb-icon { font-size: 1.4rem; }
+  .nb-text { flex: 1; }
+  .nb-title { font-family: var(--ff-display); font-weight: 700; color: #fff; font-size: .95rem; }
+  .nb-sub   { font-size: .75rem; color: rgba(255,255,255,.75); margin-top: 1px; }
+  .nb-close {
+    width: 30px; height: 30px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,.22); color: #fff; font-size: 1.1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Bottom panel ── */
+  #bottom-panel {
+    position: relative; z-index: 10;
+    background: var(--bg); border-top: 1px solid var(--border);
+    max-height: 54vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 10px auto 0; }
+  .p-empty { padding: 20px; text-align: center; color: var(--muted); font-size: .875rem; }
+  .p-empty strong { display: block; font-family: var(--ff-display); font-size: .95rem; color: var(--text); margin-bottom: 4px; }
+
+  /* route steps */
+  .rh { padding: 16px 20px 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .rh-left .rt { font-family: var(--ff-display); font-weight: 700; font-size: 1rem; }
+  .rh-left .rd { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+  .r-clear { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; padding: 4px; }
+
+  .step-list { padding: 0 20px 8px; }
+  .step { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); animation: fadeUp .3s ease both; }
+  .step:last-child { border-bottom: none; }
+  .step-n {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    background: var(--bg3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 700; color: var(--accent); margin-top: 1px;
+  }
+  .step-n.final { background: rgba(255,59,48,.15); border-color: rgba(255,59,48,.3); color: #FF3B30; }
+  .step-t { font-size: .875rem; line-height: 1.5; }
+
+  .start-nav {
+    margin: 4px 20px 20px; padding: 14px;
+    background: #FF3B30; border: none; border-radius: 10px; color: #fff;
+    font-family: var(--ff-body); font-size: .95rem; font-weight: 700;
+    cursor: pointer; width: calc(100% - 40px);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background .15s;
+  }
+  .start-nav:hover { background: #d93228; }
+  .start-nav svg { width: 18px; height: 18px; }
+
+  @keyframes fadeUp { from{ opacity:0;transform:translateY(10px) } to{ opacity:1;transform:none } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="map-container">
+
+  <svg id="map-svg" viewBox="0 0 {{ market.map_width }} {{ market.map_height }}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M60 0L0 0 0 60" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+
+    <!-- Base path lines -->
+    <g>{% for e in edges %}
+      <line class="edge-bg" x1="{{ e.node_from.x }}" y1="{{ e.node_from.y }}" x2="{{ e.node_to.x }}" y2="{{ e.node_to.y }}"/>
+    {% endfor %}</g>
+
+    <!-- Route layers (rendered UNDER nodes) -->
+    <polyline id="route-shadow" points=""/>
+    <polyline id="route-glow"   points=""/>
+    <polyline id="route-solid"  points=""/>
+    <polyline id="route-arrow"  points=""/>
+
+    <!-- Nodes -->
+    <g id="nodes-layer">{% for n in nodes %}
+      <g id="nd-{{ n.id }}" data-id="{{ n.id }}" data-x="{{ n.x }}" data-y="{{ n.y }}"
+         data-label="{{ n.label }}" data-type="{{ n.node_type }}"
+         data-zone="{{ n.zone.name|default:'' }}"
+         data-vendor="{% if n.vendor %}{{ n.vendor.business_name }}{% endif %}">
+        {% if n.node_type == 'intersection' %}
+          <circle class="n-junction-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="9"/>
+          <circle class="n-junction-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="4"/>
+        {% elif n.node_type == 'entrance' or n.node_type == 'exit' %}
+          <circle class="n-entrance-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="16"/>
+          <circle class="n-entrance-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="8"/>
+        {% else %}
+          <circle class="n-stall-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="14"/>
+          <circle class="n-stall-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="7"/>
+        {% endif %}
+        {% if n.node_type != 'intersection' %}
+          <text id="lbl-{{ n.id }}" class="node-lbl" x="{{ n.x }}" y="{{ n.y|add:30 }}" text-anchor="middle">{{ n.label }}</text>
+        {% endif %}
+        <!-- Fat invisible hit target — makes tapping easy -->
+        <circle class="node-hit" cx="{{ n.x }}" cy="{{ n.y }}" r="30"
+                onclick="tapNode({{ n.id }})"/>
+      </g>
+    {% endfor %}</g>
+
+    <!-- Start marker (orange) -->
+    <g id="start-marker">
+      <circle class="sm-pulse" cx="0" cy="0" r="34"/>
+      <circle class="sm-ring"  cx="0" cy="0" r="20"/>
+      <circle class="sm-dot"   cx="0" cy="0" r="12"/>
+      <circle class="sm-core"  cx="0" cy="0" r="5"/>
+    </g>
+
+    <!-- Destination marker (red) -->
+    <g id="dest-marker">
+      <circle class="dm-pulse" cx="0" cy="0" r="30"/>
+      <circle class="dm-ring"  cx="0" cy="0" r="18"/>
+      <circle class="dm-dot"   cx="0" cy="0" r="11"/>
+      <circle class="dm-core"  cx="0" cy="0" r="4"/>
+    </g>
+  </svg>
+
+  <!-- Controls -->
+  <div class="zoom-wrap">
+    <button class="zoom-btn" onclick="zm(1.3)">+</button>
+    <button class="zoom-btn" onclick="zm(0.77)">−</button>
+  </div>
+
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#F5A623"></div>You are here</div>
+    <div class="li"><div class="ld" style="background:#FF3B30"></div>Destination</div>
+    <div class="li"><div class="ld" style="background:#2ECC71"></div>Entrance</div>
+    <div class="li"><div class="ld" style="background:rgba(255,255,255,.45)"></div>Stall</div>
+  </div>
+
+  <div id="hint-pill">
+    {% if from_node %}Tap a destination stall{% else %}Tap any stall to start{% endif %}
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip">
+    <div class="tt-name" id="tt-name"></div>
+    <div class="tt-meta" id="tt-meta"></div>
+    <div class="tt-row" id="tt-btns"></div>
+  </div>
+
+</div>
+
+<!-- Nav banner -->
+<div id="nav-banner">
+  <div class="nb-icon">🧭</div>
+  <div class="nb-text">
+    <div class="nb-title" id="nb-title">Navigating…</div>
+    <div class="nb-sub"   id="nb-sub">Follow the red route</div>
+  </div>
+  <button class="nb-close" onclick="clearRoute()">✕</button>
+</div>
+
+<!-- Bottom panel -->
+<div id="bottom-panel">
+  <div class="handle"></div>
+  <div id="panel-body">
+    <div class="p-empty">
+      <strong>{% if from_node %}You're at {{ from_node.label }}{% else %}Explore the market{% endif %}</strong>
+      {% if from_node %}Tap any stall to get walking directions{% else %}Tap a stall to set your location{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Context from Django ─────────────────────────────────────────
+const SLUG     = "{{ market.slug }}";
+const INIT_FROM = {{ from_node.id|default:"null" }};
+const INIT_TO   = "{{ to_node_id|default:'' }}" === "" ? null : parseInt("{{ to_node_id|default:0 }}");
+const MAP_W    = {{ market.map_width }};
+const MAP_H    = {{ market.map_height }};
+
+// ── State ───────────────────────────────────────────────────────
+let fromId   = INIT_FROM;   // current start node
+let toId     = null;        // current destination
+let selId    = null;        // tapped node
+let scanUrl  = '#';
+
+// ── Build coordinate table from DOM ────────────────────────────
+const COORDS = {};
+document.querySelectorAll('#nodes-layer > g[data-id]').forEach(g => {
+  COORDS[+g.dataset.id] = { x: +g.dataset.x, y: +g.dataset.y };
+});
+
+// ── SVG pan/zoom ────────────────────────────────────────────────
+const svg = document.getElementById('map-svg');
+const box = document.getElementById('map-container');
+let sc = 1, px = 0, py = 0, drag = false, mx = 0, my = 0, moved = false, pd = 0;
+
+function apply() {
+  const r = box.getBoundingClientRect();
+  px = Math.max(r.width  - MAP_W*sc - r.width*.5,  Math.min(r.width*.5,  px));
+  py = Math.max(r.height - MAP_H*sc - r.height*.5, Math.min(r.height*.5, py));
+  svg.style.transform = `translate(${px}px,${py}px) scale(${sc})`;
+  svg.style.transformOrigin = '0 0';
+}
+function zm(f, cx, cy) {
+  const r = box.getBoundingClientRect();
+  cx = cx ?? r.width/2; cy = cy ?? r.height/2;
+  const ns = Math.max(.3, Math.min(7, sc*f));
+  px = cx-(cx-px)*(ns/sc); py = cy-(cy-py)*(ns/sc);
+  sc = ns; apply();
+}
+function fit() {
+  const r = box.getBoundingClientRect();
+  sc = Math.min(r.width/MAP_W, r.height/MAP_H) * .88;
+  px = (r.width - MAP_W*sc)/2; py = (r.height - MAP_H*sc)/2; apply();
+}
+
+svg.addEventListener('mousedown', e => {
+  if (e.target.classList.contains('node-hit')) return;
+  drag = true; moved = false; mx = e.clientX; my = e.clientY;
+});
+window.addEventListener('mousemove', e => {
+  if (!drag) return;
+  if (Math.abs(e.clientX-mx)+Math.abs(e.clientY-my)>3) moved = true;
+  px += e.clientX-mx; py += e.clientY-my; mx = e.clientX; my = e.clientY; apply();
+});
+window.addEventListener('mouseup', () => drag = false);
+
+svg.addEventListener('touchstart', e => {
+  if (e.touches.length===1 && !e.target.classList.contains('node-hit')) {
+    drag=true; moved=false; mx=e.touches[0].clientX; my=e.touches[0].clientY;
+  } else if (e.touches.length===2) {
+    drag=false;
+    pd = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+  }
+}, {passive:true});
+svg.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length===1 && drag) {
+    const dx=e.touches[0].clientX-mx, dy=e.touches[0].clientY-my;
+    if (Math.abs(dx)+Math.abs(dy)>3) moved=true;
+    px+=dx; py+=dy; mx=e.touches[0].clientX; my=e.touches[0].clientY; apply();
+  } else if (e.touches.length===2) {
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    const r=box.getBoundingClientRect();
+    zm(d/pd, (e.touches[0].clientX+e.touches[1].clientX)/2-r.left, (e.touches[0].clientY+e.touches[1].clientY)/2-r.top);
+    pd=d;
+  }
+}, {passive:false});
+svg.addEventListener('touchend', ()=>drag=false, {passive:true});
+box.addEventListener('wheel', e=>{
+  e.preventDefault();
+  const r=box.getBoundingClientRect();
+  zm(e.deltaY<0?1.15:.87, e.clientX-r.left, e.clientY-r.top);
+},{passive:false});
+
+// Close tooltip on background tap (not after drag)
+svg.addEventListener('click', e => {
+  if (moved) return;
+  if (!e.target.classList.contains('node-hit')) closeTooltip();
+});
+
+// ── Markers ─────────────────────────────────────────────────────
+function setMarker(id, x, y) {
+  const m = document.getElementById(id);
+  m.querySelectorAll('circle').forEach(c=>{ c.setAttribute('cx',x); c.setAttribute('cy',y); });
+  m.style.display='';
+}
+function hideMarker(id) { document.getElementById(id).style.display='none'; }
+
+// Place start marker if we have from_node
+{% if from_node %}
+setMarker('start-marker', {{ from_node.x }}, {{ from_node.y }});
+{% endif %}
+
+// ── Node tap ─────────────────────────────────────────────────────
+function tapNode(id) {
+  if (moved) return;
+  selId = id;
+  const g = document.getElementById('nd-'+id);
+  const label  = g.dataset.label;
+  const type   = g.dataset.type;
+  const zone   = g.dataset.zone;
+  const vendor = g.dataset.vendor;
+  scanUrl = `/scan/node/${id}/`;
+
+  document.getElementById('tt-name').textContent = label;
+  let meta = type.charAt(0).toUpperCase()+type.slice(1);
+  if (zone)   meta += ' · '+zone;
+  if (vendor) meta += ' · '+vendor;
+  document.getElementById('tt-meta').textContent = meta;
+
+  // Build action buttons based on state
+  const row = document.getElementById('tt-btns');
+  if (!fromId) {
+    // No start yet
+    row.innerHTML = `
+      <button class="tt-btn tt-amber" onclick="setStart(${id})">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+        </svg>Set as My Location
+      </button>
+      <button class="tt-btn tt-ghost" onclick="window.location=scanUrl">View Stall</button>`;
+  } else if (id === fromId) {
+    row.innerHTML = `
+      <button class="tt-btn tt-amber" onclick="setStart(${id})">📍 Change My Location</button>
+      <button class="tt-btn tt-ghost" onclick="window.location=scanUrl">View Stall</button>`;
+  } else {
+    row.innerHTML = `
+      <button class="tt-btn tt-primary" onclick="getDirections(${id})">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25M3 19l5-5 5 5m-5-5V4"/>
+        </svg>Get Directions
+      </button>
+      <button class="tt-btn tt-ghost" onclick="window.location=scanUrl">View Stall</button>`;
+  }
+
+  document.getElementById('tooltip').classList.add('open');
+  document.getElementById('hint-pill').classList.add('gone');
+}
+
+function closeTooltip() {
+  document.getElementById('tooltip').classList.remove('open');
+  selId = null;
+}
+
+// ── Set start ────────────────────────────────────────────────────
+function setStart(id) {
+  fromId = id;
+  const c = COORDS[id];
+  if (c) setMarker('start-marker', c.x, c.y);
+  closeTooltip();
+  clearRouteVisuals();
+  document.getElementById('panel-body').innerHTML = `
+    <div class="p-empty">
+      <strong>Location set ✓</strong>
+      Now tap any stall and choose Get Directions.
+    </div>`;
+  document.getElementById('hint-pill').textContent = 'Tap a destination stall';
+  document.getElementById('hint-pill').classList.remove('gone');
+  showToast('Start point set — now tap a destination.');
+}
+
+// ── Get directions ───────────────────────────────────────────────
+async function getDirections(destId) {
+  if (!fromId) { showToast('Set your location first.'); return; }
+  if (destId===fromId) { showToast('Choose a different stall.'); return; }
+  toId = destId;
+  closeTooltip();
+  document.getElementById('panel-body').innerHTML =
+    '<div class="p-empty"><div class="spinner" style="margin:0 auto 10px"></div>Calculating route…</div>';
+
+  try {
+    const res = await fetch('/api/v1/navigation/route/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken':csrf()},
+      body: JSON.stringify({market_slug:SLUG, from_node_id:fromId, to_node_id:destId})
+    });
+    const data = await res.json();
+    if (!data.found) { showToast(data.error||'No route found.'); resetPanel(); return; }
+    drawRoute(data);
+    showSteps(data);
+  } catch(e) {
+    showToast('Network error — try again.'); resetPanel();
+  }
+}
+
+// ── Draw route on SVG ────────────────────────────────────────────
+function drawRoute(data) {
+  const pts = data.path.map(id=>{ const c=COORDS[id]; return c?`${c.x},${c.y}`:null; }).filter(Boolean).join(' ');
+  ['route-shadow','route-glow','route-solid','route-arrow'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.setAttribute('points', pts);
+    el.classList.add('on');
+  });
+
+  // Destination marker
+  const last = COORDS[data.path[data.path.length-1]];
+  if (last) setMarker('dest-marker', last.x, last.y);
+
+  // Label colours
+  document.querySelectorAll('.node-lbl').forEach(el=>el.classList.remove('lbl-start','lbl-dest'));
+  const sl=document.getElementById('lbl-'+data.path[0]);
+  const dl=document.getElementById('lbl-'+data.path[data.path.length-1]);
+  if (sl) sl.classList.add('lbl-start');
+  if (dl) dl.classList.add('lbl-dest');
+
+  document.getElementById('hint-pill').classList.add('gone');
+}
+
+// ── Show steps ───────────────────────────────────────────────────
+function showSteps(data) {
+  const dest  = data.node_labels[data.node_labels.length-1];
+  const start = data.node_labels[0];
+  const steps = data.steps.map((s,i)=>{
+    const last = i===data.steps.length-1;
+    return `<div class="step" style="animation-delay:${i*.05}s">
+      <div class="step-n ${last?'final':''}">${i+1}</div>
+      <div class="step-t">${s}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('panel-body').innerHTML = `
+    <div class="rh">
+      <div class="rh-left">
+        <div class="rt">To: ${dest}</div>
+        <div class="rd">From ${start} &nbsp;·&nbsp; ${data.distance}m &nbsp;·&nbsp; ${data.steps.length} steps</div>
+      </div>
+      <button class="r-clear" onclick="clearRoute()">✕</button>
+    </div>
+    <div style="height:1px;background:var(--border);margin:0 20px"></div>
+    <div class="step-list">${steps}</div>
+    <button class="start-nav" onclick="startNav('${dest}','${start}',${data.distance})">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"/>
+      </svg>
+      Start Navigation
+    </button>`;
+
+  // Show nav banner
+  document.getElementById('nb-title').textContent = `Heading to ${dest}`;
+  document.getElementById('nb-sub').textContent   = `${data.distance}m walking · ${data.steps.length} steps`;
+  document.getElementById('nav-banner').classList.add('on');
+}
+
+// ── Start navigation mode ────────────────────────────────────────
+function startNav(dest, start, dist) {
+  showToast(`🧭 Follow the red line to ${dest}`);
+  document.getElementById('bottom-panel').scrollTop = 0;
+  // Zoom map to show full route
+  fit();
+}
+
+// ── Clear ────────────────────────────────────────────────────────
+function clearRouteVisuals() {
+  ['route-shadow','route-glow','route-solid','route-arrow'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.setAttribute('points',''); el.classList.remove('on');
+  });
+  hideMarker('dest-marker');
+  document.querySelectorAll('.node-lbl').forEach(el=>el.classList.remove('lbl-start','lbl-dest'));
+  document.getElementById('nav-banner').classList.remove('on');
+}
+function clearRoute() {
+  clearRouteVisuals();
+  toId = null;
+  resetPanel();
+  document.getElementById('hint-pill').textContent = fromId?'Tap a destination stall':'Tap any stall to start';
+  document.getElementById('hint-pill').classList.remove('gone');
+}
+function resetPanel() {
+  document.getElementById('panel-body').innerHTML = `
+    <div class="p-empty">
+      <strong>Tap any stall to navigate</strong>
+      ${fromId?'Tap a destination stall to get directions.':'Tap any stall to set your location.'}
+    </div>`;
+}
+
+// ── CSRF ─────────────────────────────────────────────────────────
+function csrf() {
+  const m=document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)');
+  return m?m[2]:'';
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  fit();
+  // Auto-route: came from search with both ?from= and ?to=
+  if (INIT_TO && fromId && INIT_TO !== fromId) {
+    setTimeout(() => getDirections(INIT_TO), 500);
+  }
+  // Only ?to= — zoom to destination node and prompt user to set start
+  else if (INIT_TO && !fromId) {
+    const c = COORDS[INIT_TO];
+    if (c) {
+      const r = box.getBoundingClientRect();
+      sc = 1.6;
+      px = r.width/2  - c.x * sc;
+      py = r.height/2 - c.y * sc;
+      apply();
+    }
+    showToast('Tap your current location first, then get directions.');
+  }
+});
+window.addEventListener('resize', fit);
+</script>
+{% endblock %}

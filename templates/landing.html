@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080E1A" />
+  <title>MarketNav — Find Any Vendor, Any Stall, Any Market</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:      #080E1A;
+      --bg2:     #0D1628;
+      --surface: #131F35;
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #F5A623;
+      --accent2: #FF6B35;
+      --green:   #2ECC71;
+      --text:    #EDF2FF;
+      --muted:   #6B7FA3;
+      --ff-d:    'Syne', sans-serif;
+      --ff-b:    'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--ff-b);
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Grain overlay ──────────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999;
+    }
+
+    /* ── NAV ────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 60px;
+      background: rgba(8,14,26,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-family: var(--ff-d);
+      font-size: 1.1rem; font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .brand-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    .nav-btn {
+      padding: 7px 16px; border-radius: 8px;
+      font-family: var(--ff-b); font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-btn-ghost {
+      color: var(--muted); border: 1px solid var(--border);
+      background: transparent;
+    }
+    .nav-btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .nav-btn-solid {
+      background: var(--accent); color: #080E1A; font-weight: 700;
+    }
+    .nav-btn-solid:hover { background: #f5b840; transform: translateY(-1px); }
+
+    /* ── HERO ───────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100dvh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 100px 32px 60px;
+      position: relative; overflow: hidden;
+    }
+
+    /* Diagonal grid background */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,166,35,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,166,35,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: skewY(-6deg) translateY(-60px);
+      pointer-events: none;
+    }
+
+    /* Glow blobs */
+    .blob {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none; opacity: 0.18;
+    }
+    .blob-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #F5A623, transparent 70%);
+      top: -100px; right: -100px;
+    }
+    .blob-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, #2ECC71, transparent 70%);
+      bottom: 0; left: -80px; opacity: 0.1;
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 100px; padding: 6px 14px;
+      font-size: 0.78rem; font-weight: 500;
+      color: var(--accent); letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .tag-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+
+    h1 {
+      font-family: var(--ff-d);
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-weight: 800; line-height: 1.0;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+
+    h1 .highlight {
+      color: var(--accent);
+      position: relative; display: inline-block;
+    }
+    h1 .highlight::after {
+      content: '';
+      position: absolute; bottom: 4px; left: 0; right: 0;
+      height: 3px; background: var(--accent);
+      border-radius: 2px; opacity: 0.4;
+    }
+
+    .hero-sub {
+      margin-top: 20px;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 300; line-height: 1.65;
+      color: var(--muted); max-width: 520px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+
+    .hero-cta {
+      margin-top: 36px;
+      display: flex; flex-wrap: wrap; gap: 12px;
+      animation: fadeUp 0.6s ease 0.3s both;
+    }
+
+    .cta-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 28px; border-radius: 10px;
+      background: var(--accent); color: #080E1A;
+      font-family: var(--ff-b); font-size: 1rem; font-weight: 700;
+      text-decoration: none; transition: all 0.2s;
+      box-shadow: 0 8px 32px rgba(245,166,35,0.3);
+    }
+    .cta-primary:hover { background: #f5b840; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245,166,35,0.4); }
+    .cta-primary svg { width: 20px; height: 20px; }
+
+    .cta-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 28px; border-radius: 10px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+      font-family: var(--ff-b); font-size: 1rem; font-weight: 500;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .cta-secondary:hover { background: #1a2840; border-color: rgba(255,255,255,0.15); }
+    .cta-secondary svg { width: 18px; height: 18px; }
+
+    /* ── STATS ROW ──────────────────────────────────────────────── */
+    .stats {
+      margin-top: 56px;
+      display: flex; flex-wrap: wrap; gap: 28px;
+      animation: fadeUp 0.6s ease 0.4s both;
+    }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num {
+      font-family: var(--ff-d);
+      font-size: 1.8rem; font-weight: 800;
+      letter-spacing: -0.03em; color: var(--text);
+    }
+    .stat-num span { color: var(--accent); }
+    .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 400; }
+    .stat-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+    /* ── SCROLL INDICATOR ───────────────────────────────────────── */
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 0.75rem; letter-spacing: 0.08em;
+      text-transform: uppercase; animation: fadeUp 1s ease 0.8s both;
+    }
+    .scroll-arrow {
+      width: 24px; height: 24px; border-right: 2px solid var(--muted);
+      border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg);
+      animation: bounce 2s ease infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: rotate(45deg) translateY(0); }
+      50%      { transform: rotate(45deg) translateY(5px); }
+    }
+
+    /* ── HOW IT WORKS ───────────────────────────────────────────── */
+    section { padding: 80px 32px; }
+
+    .section-eyebrow {
+      font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: var(--ff-d);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.03em; color: var(--text);
+      max-width: 500px;
+    }
+
+    .steps {
+      margin-top: 56px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2px;
+    }
+
+    .step {
+      background: var(--surface);
+      padding: 32px 28px;
+      position: relative; overflow: hidden;
+      transition: background 0.2s;
+    }
+    .step:hover { background: #172035; }
+    .step:first-child { border-radius: 16px 0 0 16px; }
+    .step:last-child  { border-radius: 0 16px 16px 0; }
+
+    @media (max-width: 640px) {
+      .step { border-radius: 0 !important; }
+      .step:first-child { border-radius: 12px 12px 0 0 !important; }
+      .step:last-child  { border-radius: 0 0 12px 12px !important; }
+    }
+
+    .step-num-bg {
+      position: absolute; top: -10px; right: 16px;
+      font-family: var(--ff-d); font-size: 5rem; font-weight: 800;
+      color: rgba(255,255,255,0.03); line-height: 1;
+      pointer-events: none;
+    }
+
+    .step-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 20px;
+    }
+
+    .step-title {
+      font-family: var(--ff-d); font-size: 1.05rem; font-weight: 700;
+      letter-spacing: -0.01em; margin-bottom: 10px;
+    }
+    .step-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── MARKETS GRID ───────────────────────────────────────────── */
+    .markets-section { background: var(--bg2); }
+
+    .markets-grid {
+      margin-top: 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .market-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px;
+      text-decoration: none; color: var(--text);
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .market-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(245,166,35,0.06), transparent 60%);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .market-card:hover { border-color: rgba(245,166,35,0.3); transform: translateY(-3px); }
+    .market-card:hover::before { opacity: 1; }
+
+    .mc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .mc-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .mc-live {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.2);
+      border-radius: 100px; padding: 3px 10px;
+      font-size: 0.7rem; color: var(--green); font-weight: 500;
+    }
+    .mc-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--green);
+    }
+    .mc-name {
+      font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700;
+      letter-spacing: -0.02em; margin-bottom: 4px;
+    }
+    .mc-location { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+    .mc-meta {
+      display: flex; gap: 16px;
+      font-size: 0.78rem; color: var(--muted);
+      border-top: 1px solid var(--border); padding-top: 14px;
+    }
+    .mc-meta strong { color: var(--text); font-weight: 600; }
+
+    .mc-enter {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 14px; padding: 10px;
+      background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.15);
+      border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      color: var(--accent); transition: all 0.2s;
+    }
+    .market-card:hover .mc-enter { background: rgba(245,166,35,0.15); }
+
+    .empty-market {
+      background: transparent;
+      border: 2px dashed var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 40px 24px;
+      border-radius: 16px; color: var(--muted);
+      min-height: 200px;
+    }
+    .empty-market .plus { font-size: 2rem; margin-bottom: 10px; opacity: 0.4; }
+    .empty-market p { font-size: 0.85rem; line-height: 1.5; }
+
+    /* ── FOR VENDORS STRIP ──────────────────────────────────────── */
+    .vendor-strip {
+      background: linear-gradient(135deg, rgba(245,166,35,0.08) 0%, rgba(255,107,53,0.06) 100%);
+      border: 1px solid rgba(245,166,35,0.15);
+      border-radius: 20px; padding: 40px 36px;
+      display: flex; align-items: center; gap: 32px;
+      flex-wrap: wrap;
+    }
+    .vs-content { flex: 1; min-width: 240px; }
+    .vs-title {
+      font-family: var(--ff-d); font-size: 1.5rem; font-weight: 800;
+      letter-spacing: -0.02em; margin-bottom: 8px;
+    }
+    .vs-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── FOOTER ─────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-brand {
+      font-family: var(--ff-d); font-size: 0.95rem; font-weight: 800;
+      letter-spacing: -0.02em; color: var(--text);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .footer-copy { font-size: 0.78rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── ANIMATIONS ─────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .hero { padding: 90px 20px 60px; }
+      section { padding: 60px 20px; }
+      .steps { gap: 2px; }
+      .vendor-strip { padding: 28px 20px; }
+      footer { padding: 24px 20px; flex-direction: column; align-items: flex-start; }
+      .stat-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="brand">
+    <span class="brand-dot"></span>MarketNav
+  </a>
+  <div class="nav-actions">
+    <a href="/admin/" class="nav-btn nav-btn-ghost">Admin</a>
+    {% if markets %}
+    <a href="/market/{{ markets.0.slug }}/map/" class="nav-btn nav-btn-solid">Open a Market</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">
+      <span class="tag-dot"></span>
+      Now live in Nigeria
+    </div>
+
+    <h1>
+      Find any stall.<br>
+      <span class="highlight">Any market.</span><br>
+      Instantly.
+    </h1>
+
+    <p class="hero-sub">
+      Scan a QR code at any market entrance or stall.
+      MarketNav shows you exactly where you are and guides you
+      step-by-step to any vendor — no app download required.
+    </p>
+
+    <div class="hero-cta">
+      {% if markets %}
+      <a href="/market/{{ markets.0.slug }}/map/" class="cta-primary">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/>
+        </svg>
+        Explore {{ markets.0.name }}
+      </a>
+      {% endif %}
+      <a href="/search/" class="cta-secondary">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803z"/>
+        </svg>
+        Search Vendors
+      </a>
+    </div>
+
+    <div class="stats">
+      {% if markets %}
+      <div class="stat">
+        <div class="stat-num">{{ markets|length }}<span>+</span></div>
+        <div class="stat-label">Active Market{{ markets|length|pluralize }}</div>
+      </div>
+      <div class="stat-divider"></div>
+      {% endif %}
+      <div class="stat">
+        <div class="stat-num">{{ total_vendors }}<span>+</span></div>
+        <div class="stat-label">Registered Vendors</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <div class="stat-num">0<span>s</span></div>
+        <div class="stat-label">App Downloads Needed</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-eyebrow">Simple by design</div>
+  <div class="section-title">Navigate any market in 3 steps</div>
+
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num-bg">1</div>
+      <div class="step-icon">📱</div>
+      <div class="step-title">Scan the QR Code</div>
+      <div class="step-desc">Find a QR code at any market entrance, aisle junction, or stall. Scan it with your phone camera — no app needed.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num-bg">2</div>
+      <div class="step-icon">🔍</div>
+      <div class="step-title">Search What You Need</div>
+      <div class="step-desc">Type a vendor name, product, or category. MarketNav searches across every registered stall in real time.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num-bg">3</div>
+      <div class="step-icon">🗺️</div>
+      <div class="step-title">Follow the Route</div>
+      <div class="step-desc">Get step-by-step walking directions drawn on the market map. Find your destination fast, even in the busiest markets.</div>
+    </div>
+    <div class="step reveal">
+      <div class="step-num-bg">4</div>
+      <div class="step-icon">💬</div>
+      <div class="step-title">Contact the Vendor</div>
+      <div class="step-desc">Call or WhatsApp the vendor directly from the stall page. Check products and prices before you even walk there.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETS -->
+<section class="markets-section" id="markets">
+  <div class="section-eyebrow">Live on MarketNav</div>
+  <div class="section-title">Browse active markets</div>
+
+  <div class="markets-grid">
+    {% for market in markets %}
+    <a href="/market/{{ market.slug }}/map/" class="market-card reveal">
+      <div class="mc-top">
+        <div class="mc-icon">🏪</div>
+        <div class="mc-live"><span class="mc-live-dot"></span> Live</div>
+      </div>
+      <div class="mc-name">{{ market.name }}</div>
+      <div class="mc-location">📍 {{ market.city }}, {{ market.state }}</div>
+      <div class="mc-meta">
+        <div><strong>{{ market.node_count }}</strong> stalls</div>
+        <div><strong>{{ market.vendor_count }}</strong> vendors</div>
+        <div><strong>{{ market.zone_count }}</strong> zones</div>
+      </div>
+      <div class="mc-enter">
+        Open Map
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+        </svg>
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-market">
+      <div class="plus">＋</div>
+      <p>No markets yet.<br>Add one via the <a href="/admin/markets/market/add/" style="color:var(--accent)">admin panel</a>.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- FOR VENDORS -->
+<section id="vendors">
+  <div class="vendor-strip reveal">
+    <div class="vs-content">
+      <div class="section-eyebrow" style="margin-bottom:8px">Are you a vendor?</div>
+      <div class="vs-title">Put your stall on the map</div>
+      <div class="vs-desc">
+        Register your stall on MarketNav and thousands of shoppers can find you by name,
+        product, or category. Add your WhatsApp number and customers can contact you instantly.
+        Free during pilot.
+      </div>
+    </div>
+    <a href="/admin/" class="cta-primary" style="flex-shrink:0">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+      </svg>
+      Get Listed
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <span class="brand-dot" style="width:7px;height:7px"></span>
+    MarketNav
+  </div>
+  <div class="footer-copy">© 2025 MarketNav. Built for Nigerian markets.</div>
+  <div class="footer-links">
+    <a href="/admin/">Admin</a>
+    <a href="#how">How it works</a>
+    <a href="#markets">Markets</a>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

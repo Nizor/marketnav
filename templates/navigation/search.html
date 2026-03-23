@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Find a Vendor — {{ market.name|default:"MarketNav" }}{% endblock %}
+
+{% block nav_right %}
+<a href="{% if from_node_id and market %}{% url 'market-map' market.slug %}?from={{ from_node_id }}{% else %}{% url 'landing' %}{% endif %}" class="nav-back">
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+  </svg>
+  Map
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .search-page { padding: 0 20px; }
+
+  /* ── Hero search ────────────────────────────────────────────── */
+  .search-hero {
+    padding: 24px 0 0;
+    animation: fadeUp 0.35s ease both;
+  }
+  .search-hero .page-eyebrow { margin-bottom: 4px; }
+  .search-hero .page-title { margin-bottom: 16px; }
+
+  /* ── Category chips ─────────────────────────────────────────── */
+  .cat-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin: 16px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    animation: fadeUp 0.35s ease 0.08s both;
+  }
+  .cat-scroll::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--ff-body);
+    text-decoration: none;
+  }
+  .cat-chip:hover, .cat-chip.active {
+    background: rgba(245,166,35,0.12);
+    border-color: rgba(245,166,35,0.4);
+    color: var(--accent);
+  }
+  .cat-chip-icon { font-size: 1rem; }
+
+  /* ── Results area ───────────────────────────────────────────── */
+  #results {
+    margin-top: 8px;
+    padding-bottom: 40px;
+  }
+
+  .results-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 20px;
+  }
+
+  /* ── Vendor result card ─────────────────────────────────────── */
+  .vendor-result {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    transition: border-color var(--transition), transform var(--transition);
+    animation: fadeUp 0.3s ease both;
+  }
+  .vendor-result:hover {
+    border-color: rgba(245,166,35,0.35);
+    transform: translateY(-2px);
+  }
+
+  .vr-body {
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .vr-avatar {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--ff-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0A1628;
+    flex-shrink: 0;
+  }
+
+  .vr-info { flex: 1; min-width: 0; }
+  .vr-name {
+    font-family: var(--ff-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vr-stall {
+    font-size: 0.78rem;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .vr-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .vr-cats {
+    padding: 0 16px 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .vr-footer {
+    border-top: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .vr-contact {
+    display: flex;
+    gap: 6px;
+  }
+  .vr-contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-decoration: none;
+    font-family: var(--ff-body);
+    transition: all var(--transition);
+  }
+  .vr-contact-btn svg { width: 14px; height: 14px; }
+  .vr-btn-wa {
+    background: rgba(37,211,102,0.1);
+    color: #25D366;
+    border: 1px solid rgba(37,211,102,0.2);
+  }
+  .vr-btn-wa:hover { background: rgba(37,211,102,0.2); }
+  .vr-btn-dir {
+    background: rgba(245,166,35,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(245,166,35,0.2);
+  }
+  .vr-btn-dir:hover { background: rgba(245,166,35,0.2); }
+
+  /* ── Empty / loading states ─────────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state strong {
+    display: block;
+    font-family: var(--ff-display);
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .loading-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+  <div class="search-hero">
+    <div class="page-eyebrow">{{ market.name }}</div>
+    <h1 class="page-title">Find a Vendor</h1>
+
+    <!-- Search input with HTMX live search -->
+    <div class="search-wrap">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0015.803 15.803z"/>
+      </svg>
+      <input
+        id="search-input"
+        class="search-input"
+        type="search"
+        placeholder="Search vendors, products, categories…"
+        autocomplete="off"
+        autofocus
+        hx-get="{% url 'search-results' %}"
+        hx-trigger="input changed delay:300ms, search"
+        hx-target="#results"
+        hx-include="[name='market'],[name='from']"
+        hx-indicator="#search-spinner"
+        name="q"
+      />
+    </div>
+
+    <!-- Hidden fields for HTMX -->
+    <input type="hidden" name="market" value="{{ market.slug }}" />
+    <input type="hidden" name="from"   value="{{ from_node_id|default:'' }}" />
+  </div>
+
+  <!-- Category quick filters -->
+  <div class="cat-scroll">
+    <button class="cat-chip active" onclick="filterCat(this, '')">All</button>
+    {% for cat in categories %}
+    <button class="cat-chip" onclick="filterCat(this, '{{ cat.id }}')">
+      {% if cat.icon %}<span class="cat-chip-icon">{{ cat.icon }}</span>{% endif %}
+      {{ cat.name }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- Spinner (HTMX indicator) -->
+  <div id="search-spinner" class="htmx-indicator loading-state">
+    <div class="spinner"></div> Searching…
+  </div>
+
+  <!-- Results injected here by HTMX -->
+  <div id="results">
+    {% include "navigation/partials/search_results.html" %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const FROM_NODE_ID = "{{ from_node_id|default:'' }}";
+const MARKET_SLUG  = "{{ market.slug }}";
+let activeCat = '';
+
+function filterCat(el, catId) {
+  activeCat = catId;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  // Trigger HTMX search with category filter
+  const input = document.getElementById('search-input');
+  htmx.ajax('GET', '{% url "search-results" %}', {
+    target: '#results',
+    values: {
+      q: input.value,
+      market: MARKET_SLUG,
+      from: FROM_NODE_ID,
+      category: catId,
+    }
+  });
+}
+</script>
+{% endblock %}
