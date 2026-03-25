@@ -3,6 +3,7 @@ marketnav/config/settings.py
 Django settings for the MarketNav project.
 """
 
+import os
 from pathlib import Path
 from decouple import config
 
@@ -93,7 +94,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+LOGIN_URL = "/portal/login/"
+LOGIN_REDIRECT_URL = "/portal/dashboard/"
+LOGOUT_REDIRECT_URL = "/portal/login/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -119,4 +124,8 @@ CORS_ALLOWED_ORIGINS = config(
 )
 
 # QR code media directory
-QR_CODE_DIR = MEDIA_ROOT / "qr_codes"
+QR_CODE_DIR = os.path.join(MEDIA_ROOT, "qr_codes")
+
+# File upload size limit (5MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024

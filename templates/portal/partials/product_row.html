@@ -1,0 +1,38 @@
+<tr id="product-row-{{ product.id }}">
+  <td>
+    <div style="font-weight:500">{{ product.name }}</div>
+    {% if product.description %}
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem">
+        {{ product.description|truncatechars:60 }}
+      </div>
+    {% endif %}
+  </td>
+  <td style="color:var(--muted);font-size:0.85rem">
+    {{ product.category.name|default:"—" }}
+  </td>
+  <td class="price-cell">
+    {% if product.price %}₦{{ product.price|floatformat:0 }}{% else %}<span style="color:var(--muted)">—</span>{% endif %}
+  </td>
+  <td>
+    <button
+      hx-post="{% url 'portal-product-toggle' product.id %}"
+      hx-target="#product-row-{{ product.id }}"
+      hx-swap="outerHTML"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      class="btn-icon"
+      title="Toggle availability"
+      style="{% if product.is_available %}color:#2ecc71;border-color:rgba(46,204,113,0.3){% endif %}"
+    >
+      {% if product.is_available %}● In stock{% else %}○ Hidden{% endif %}
+    </button>
+  </td>
+  <td style="text-align:right">
+    <a href="{% url 'portal-product-edit' product.id %}" class="btn-icon">Edit</a>
+    <form method="post" action="{% url 'portal-product-delete' product.id %}"
+          style="display:inline"
+          onsubmit="return confirm('Remove {{ product.name|escapejs }} from your listings?')">
+      {% csrf_token %}
+      <button type="submit" class="btn-danger">Remove</button>
+    </form>
+  </td>
+</tr>

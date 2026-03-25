@@ -1,0 +1,116 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Edit Profile — MarketNav Vendor Portal{% endblock %}
+
+{% block portal_content %}
+
+<h1 class="portal-page-title">✏️ Edit Profile</h1>
+<p class="portal-page-subtitle">
+  This information appears on your stall page when shoppers scan your QR code or find you in search.
+</p>
+
+<div style="max-width:680px">
+  <form method="post" enctype="multipart/form-data" class="portal-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="non-field-errors">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+
+    {# ── Business info ───────────────────────────────────── #}
+    <div class="portal-card">
+      <div class="portal-card-title">Business Info</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="field-row">
+          <label>Business Name *</label>
+          {{ form.business_name }}
+          {% if form.business_name.errors %}
+            <ul class="errorlist">{% for e in form.business_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="field-row">
+          <label>Owner Name</label>
+          {{ form.owner_name }}
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:1rem">
+        <label>Description</label>
+        {{ form.description }}
+        <p class="helptext">{{ form.description.help_text }}</p>
+        {% if form.description.errors %}
+          <ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Contact ─────────────────────────────────────────── #}
+    <div class="portal-card">
+      <div class="portal-card-title">Contact Details</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="field-row">
+          <label>Phone</label>
+          {{ form.phone }}
+        </div>
+        <div class="field-row">
+          <label>WhatsApp</label>
+          {{ form.whatsapp }}
+          <p class="helptext">{{ form.whatsapp.help_text }}</p>
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:1rem">
+        <label>Email</label>
+        {{ form.email }}
+      </div>
+    </div>
+
+    {# ── Logo ────────────────────────────────────────────── #}
+    <div class="portal-card">
+      <div class="portal-card-title">Stall Logo</div>
+
+      {% if vendor.logo %}
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+          <img src="{{ vendor.logo.url }}" alt="Current logo"
+               style="width:72px;height:72px;object-fit:cover;border-radius:var(--radius-sm);
+                      border:1px solid var(--border)">
+          <div>
+            <div style="font-size:0.8rem;color:var(--muted)">Current logo</div>
+            <div style="font-size:0.75rem;color:var(--muted)">Upload a new one to replace it</div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="field-row">
+        <label>{{ form.logo.label }}</label>
+        {{ form.logo }}
+        <p class="helptext">{{ form.logo.help_text }}</p>
+      </div>
+    </div>
+
+    {# ── Categories ──────────────────────────────────────── #}
+    <div class="portal-card">
+      <div class="portal-card-title">Product Categories</div>
+      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem">
+        {{ form.categories.help_text }}
+      </p>
+      <div class="checkbox-list">
+        {% for choice in form.categories %}
+          {{ choice }}
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── Actions ─────────────────────────────────────────── #}
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <a href="{% url 'portal-dashboard' %}" class="btn-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

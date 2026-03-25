@@ -1,0 +1,162 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}Dashboard — MarketNav Vendor Portal{% endblock %}
+
+{% block portal_content %}
+
+<h1 class="portal-page-title">👋 Hello, {{ vendor.business_name }}</h1>
+<p class="portal-page-subtitle">Here's a snapshot of your stall on MarketNav.</p>
+
+{# ── Stat chips ────────────────────────────────────────────── #}
+<div class="stat-row">
+  <div class="stat-chip">
+    <div class="stat-value">{{ product_count }}</div>
+    <div class="stat-label">Products Listed</div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-value">{{ available_count }}</div>
+    <div class="stat-label">Currently Available</div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-value">{{ vendor.categories.count }}</div>
+    <div class="stat-label">Categories</div>
+  </div>
+  <div class="stat-chip">
+    <div class="stat-value" style="font-size:1.4rem;padding-top:0.2rem">
+      {% if vendor.whatsapp %}✓{% else %}—{% endif %}
+    </div>
+    <div class="stat-label">WhatsApp Active</div>
+  </div>
+</div>
+
+{# ── Two-column layout ─────────────────────────────────────── #}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+
+  {# Stall info #}
+  <div class="portal-card">
+    <div class="portal-card-title">Your Stall</div>
+    <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0;width:40%">Stall ID</td>
+        <td style="color:var(--text);font-weight:500">
+          {{ stall_node.label|default:"—" }}
+        </td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0">Zone</td>
+        <td style="color:var(--text)">{{ stall_node.zone.name|default:"—" }}</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0">Market</td>
+        <td style="color:var(--text)">{{ market.name }}</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0">Phone</td>
+        <td style="color:var(--text)">{{ vendor.phone|default:"—" }}</td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0">WhatsApp</td>
+        <td>
+          {% if vendor.whatsapp %}
+            <a href="{{ vendor.whatsapp_url }}" target="_blank"
+               style="color:var(--accent);text-decoration:none;font-size:0.85rem">
+              {{ vendor.whatsapp }}
+            </a>
+          {% else %}
+            <span style="color:var(--muted)">Not set</span>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td style="color:var(--muted);padding:0.4rem 0">Categories</td>
+        <td>
+          {% for cat in vendor.categories.all %}
+            <span style="display:inline-block;background:var(--bg3);border:1px solid var(--border);
+                          border-radius:4px;padding:0.15rem 0.5rem;font-size:0.75rem;
+                          color:var(--text);margin:0.1rem 0.1rem 0 0">
+              {{ cat.name }}
+            </span>
+          {% empty %}
+            <span style="color:var(--muted);font-size:0.85rem">None set</span>
+          {% endfor %}
+        </td>
+      </tr>
+    </table>
+    <div style="margin-top:1.25rem">
+      <a href="{% url 'portal-profile' %}" class="btn-primary" style="font-size:0.85rem;padding:0.5rem 1rem">
+        ✏️ Edit Profile
+      </a>
+    </div>
+  </div>
+
+  {# Recent products #}
+  <div class="portal-card">
+    <div class="portal-card-title">Recent Products</div>
+
+    {% if recent_products %}
+      {% for product in recent_products %}
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    padding:0.65rem 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:0.875rem;color:var(--text);font-weight:500">
+              {{ product.name }}
+            </div>
+            <div style="font-size:0.75rem;color:var(--muted)">
+              {{ product.category.name|default:"Uncategorised" }}
+            </div>
+          </div>
+          <div style="text-align:right">
+            {% if product.price %}
+              <div style="font-family:var(--ff-display);color:var(--accent);font-size:0.9rem">
+                ₦{{ product.price|floatformat:0 }}
+              </div>
+            {% endif %}
+            <div class="{% if product.is_available %}badge-available{% else %}badge-unavailable{% endif %}">
+              {% if product.is_available %}● In stock{% else %}○ Hidden{% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      <div style="margin-top:1rem">
+        <a href="{% url 'portal-products' %}" class="btn-secondary" style="font-size:0.85rem;padding:0.5rem 1rem">
+          View all {{ product_count }} products →
+        </a>
+      </div>
+    {% else %}
+      <div style="padding:2rem 0;text-align:center;color:var(--muted)">
+        <div style="font-size:2rem;margin-bottom:0.5rem">📦</div>
+        <p style="font-size:0.875rem">No products listed yet.</p>
+        <a href="{% url 'portal-product-add' %}" class="btn-primary"
+           style="font-size:0.85rem;padding:0.5rem 1rem;margin-top:0.5rem;display:inline-flex">
+          + Add First Product
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{# Profile completeness prompt #}
+{% if not vendor.description or not vendor.whatsapp or not vendor.phone %}
+<div class="portal-card" style="border-color:rgba(245,166,35,0.3);margin-top:0.25rem">
+  <div style="display:flex;align-items:flex-start;gap:0.75rem">
+    <span style="font-size:1.25rem">⚠️</span>
+    <div>
+      <div style="font-size:0.9rem;font-weight:600;color:var(--text);margin-bottom:0.25rem">
+        Complete your profile
+      </div>
+      <div style="font-size:0.825rem;color:var(--muted)">
+        Shoppers see your profile when they find your stall.
+        {% if not vendor.description %}Add a description. {% endif %}
+        {% if not vendor.phone %}Add your phone number. {% endif %}
+        {% if not vendor.whatsapp %}Add a WhatsApp number so customers can reach you instantly. {% endif %}
+      </div>
+      <a href="{% url 'portal-profile' %}" class="btn-primary"
+         style="font-size:0.82rem;padding:0.45rem 1rem;margin-top:0.75rem;display:inline-flex">
+        Update Profile
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

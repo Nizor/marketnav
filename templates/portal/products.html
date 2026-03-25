@@ -1,0 +1,53 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}My Products — MarketNav Vendor Portal{% endblock %}
+
+{% block portal_content %}
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">
+  <div>
+    <h1 class="portal-page-title" style="margin-bottom:0.1rem">📦 My Products</h1>
+    <p class="portal-page-subtitle" style="margin-bottom:0">
+      {{ product_count }} listing{{ product_count|pluralize }}
+    </p>
+  </div>
+  <a href="{% url 'portal-product-add' %}" class="btn-primary">
+    + Add Product
+  </a>
+</div>
+
+{% if products %}
+  <div class="portal-card" style="padding:0;overflow:hidden">
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Price (₦)</th>
+          <th>Status</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          {% include "portal/partials/product_row.html" %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+  <div class="portal-card" style="text-align:center;padding:3rem">
+    <div style="font-size:3rem;margin-bottom:0.75rem">📭</div>
+    <h3 style="font-family:var(--ff-display);color:var(--text);margin-bottom:0.5rem">
+      No products yet
+    </h3>
+    <p style="color:var(--muted);font-size:0.875rem;margin-bottom:1.5rem">
+      Add your product listings so shoppers can see what you sell.
+    </p>
+    <a href="{% url 'portal-product-add' %}" class="btn-primary">
+      + Add Your First Product
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

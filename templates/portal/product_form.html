@@ -1,0 +1,77 @@
+{% extends "portal/base_portal.html" %}
+{% block title %}{{ action }} Product — MarketNav Vendor Portal{% endblock %}
+
+{% block portal_content %}
+
+<h1 class="portal-page-title">
+  {% if action == "Add" %}+ Add Product{% else %}✏️ Edit Product{% endif %}
+</h1>
+<p class="portal-page-subtitle">
+  {% if action == "Add" %}
+    Add a product to your stall listing. Shoppers can see this when they find you.
+  {% else %}
+    Update the details for <strong style="color:var(--text)">{{ product.name }}</strong>.
+  {% endif %}
+</p>
+
+<div style="max-width:520px">
+  <form method="post" class="portal-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="non-field-errors">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="portal-card">
+
+      <div class="field-row">
+        <label>Product Name *</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+        <div class="field-row">
+          <label>Category</label>
+          {{ form.category }}
+        </div>
+        <div class="field-row">
+          <label>Price (₦)</label>
+          {{ form.price }}
+          <p class="helptext">{{ form.price.help_text }}</p>
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:1rem">
+        <label>Description</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="field-row" style="margin-top:1rem;display:flex;align-items:center;gap:0.6rem">
+        {{ form.is_available }}
+        <label for="{{ form.is_available.id_for_label }}" style="margin:0;color:var(--text)">
+          Available in stock
+        </label>
+        <p class="helptext" style="margin:0">{{ form.is_available.help_text }}</p>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:0.75rem;align-items:center">
+      <button type="submit" class="btn-primary">
+        {% if action == "Add" %}Add Product{% else %}Save Changes{% endif %}
+      </button>
+      <a href="{% url 'portal-products' %}" class="btn-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}
