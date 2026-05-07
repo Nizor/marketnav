@@ -1,16 +1,8 @@
-"""
-apps/markets/models.py
-
-Core market structure models:
-  Market → Zone → Node
-
-Nodes are the atomic units of the indoor navigation graph.
-Each Node gets a unique QR code that visitors scan to identify their location.
-"""
-
 import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.core.validators import FileExtensionValidator
 
 
 class Market(models.Model):
@@ -27,11 +19,12 @@ class Market(models.Model):
     address = models.TextField(blank=True)
 
     # Map image uploaded by admin (SVG or raster)
-    map_image = models.ImageField(
+    map_image = models.FileField(
         upload_to="maps/",
         blank=True,
         null=True,
         help_text="Upload an SVG or image of the market floor plan.",
+        validators=[FileExtensionValidator(allowed_extensions=['svg', 'png', 'jpg', 'jpeg','webp'])],
     )
 
     # Coordinate system metadata for the map image
@@ -42,6 +35,16 @@ class Market(models.Model):
     map_height = models.PositiveIntegerField(
         default=1000,
         help_text="Logical height of the map coordinate space.",
+    )
+
+    # Real-world dimensions for accurate distance calculation
+    real_width_m = models.FloatField(
+        default=100.0,
+        help_text="Real-world width of the market in metres. Used to calibrate route distances.",
+    )
+    real_height_m = models.FloatField(
+        default=100.0,
+        help_text="Real-world height of the market in metres. Used to calibrate route distances.",
     )
 
     is_active = models.BooleanField(default=True)
@@ -55,11 +58,31 @@ class Market(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f"{self.name}-{self.city}")
+            base_slug = slugify(f"{self.name}-{self.city}")
+            slug = base_slug
+            counter = 1
+            while Market.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.city}, {self.state})"
+
+    @property
+    def scale_x(self):
+        """Metres per map unit (horizontal)."""
+        if self.map_width and self.map_width > 0:
+            return self.real_width_m / self.map_width
+        return 1.0
+
+    @property
+    def scale_y(self):
+        """Metres per map unit (vertical)."""
+        if self.map_height and self.map_height > 0:
+            return self.real_height_m / self.map_height
+        return 1.0
 
 
 class Zone(models.Model):
@@ -93,7 +116,12 @@ class Zone(models.Model):
         verbose_name_plural = "Zones"
 
     def __str__(self):
-        return f"{self.name} — {self.market.name}"
+        return f"{self.name} - {self.market.name}"
+
+    def clean(self):
+        import re
+        if self.color_hex and not re.match(r'^#[0-9A-Fa-f]{6}$', self.color_hex):
+            raise ValidationError({"color_hex": "Enter a valid hex colour (e.g. #AED6F1)."})
 
 
 class NodeType(models.TextChoices):
@@ -177,7 +205,7 @@ class Edge(models.Model):
     """
     A walkable path (edge) between two Nodes in the same Market.
 
-    The graph is treated as undirected: an Edge from A→B is also traversable B→A.
+    The graph is treated as undirected: an Edge from A->B is also traversable B->A.
     Weight is the walking distance in metres between the two nodes.
     """
 
@@ -202,4 +230,19 @@ class Edge(models.Model):
         verbose_name_plural = "Edges (Paths)"
 
     def __str__(self):
-        return f"{self.node_from.label} ↔ {self.node_to.label} ({self.weight}m)"
+        return f"{self.node_from.label} <-> {self.node_to.label} ({self.weight}m)"
+
+    def clean(self):
+        if self.node_from_id and self.node_to_id:
+            if self.node_from_id == self.node_to_id:
+                raise ValidationError("A node cannot have an edge to itself.")
+            if self.node_from.market_id != self.node_to.market_id:
+                raise ValidationError("Both nodes must belong to the same market.")
+
+    def save(self, *args, **kwargs):
+        # Normalize direction to prevent A->B and B->A duplicates
+        if self.node_from_id and self.node_to_id:
+            if self.node_from_id > self.node_to_id:
+                self.node_from, self.node_to = self.node_to, self.node_from
+        self.full_clean()
+        super().save(*args, **kwargs)

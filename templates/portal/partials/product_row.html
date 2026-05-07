@@ -8,17 +8,16 @@
     {% endif %}
   </td>
   <td style="color:var(--muted);font-size:0.85rem">
-    {{ product.category.name|default:"—" }}
+    {{ product.category.name|default:"-" }}
   </td>
   <td class="price-cell">
-    {% if product.price %}₦{{ product.price|floatformat:0 }}{% else %}<span style="color:var(--muted)">—</span>{% endif %}
+    {% if product.price %}N{{ product.price|floatformat:0 }}{% else %}<span style="color:var(--muted)">-</span>{% endif %}
   </td>
   <td>
     <button
       hx-post="{% url 'portal-product-toggle' product.id %}"
       hx-target="#product-row-{{ product.id }}"
       hx-swap="outerHTML"
-      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
       class="btn-icon"
       title="Toggle availability"
       style="{% if product.is_available %}color:#2ecc71;border-color:rgba(46,204,113,0.3){% endif %}"

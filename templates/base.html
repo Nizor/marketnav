@@ -34,6 +34,10 @@
       --radius-sm:8px;
       --radius-xs:5px;
       --ff:       'Inter', system-ui, -apple-system, sans-serif;
+      --ff-display: 'Inter', system-ui, -apple-system, sans-serif;
+      --ff-body:    'Inter', system-ui, -apple-system, sans-serif;
+      --accent2:    #F5B840;
+      --transition: all .18s var(--ease);
       --ease:     cubic-bezier(0.4, 0, 0.2, 1);
       --nav-h:    58px;
       --shadow-sm:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
@@ -324,6 +328,7 @@
     }
   </style>
   {% block extra_head %}{% endblock %}
+<base target="_blank">
 </head>
 <body>
 
@@ -362,7 +367,7 @@
     {% else %}
       <a href="{% url 'portal-login' %}" class="nav-link">Vendor Login</a>
     {% endif %}
-    <a href="/admin/" class="nav-cta">Admin</a>
+    <a href="{% url 'admin:index' %}" class="nav-cta">Admin</a>
     {% endblock %}
   </div>
 
@@ -384,7 +389,7 @@
   {% else %}
     <a href="{% url 'portal-login' %}" class="nav-link">Vendor Login</a>
   {% endif %}
-  <a href="/admin/" class="nav-cta">Admin Panel</a>
+  <a href="{% url 'admin:index' %}" class="nav-cta">Admin Panel</a>
 </div>
 
 <main>{% block content %}{% endblock %}</main>
@@ -406,6 +411,15 @@
         drw.classList.remove('open');
     });
   }
+
+  // HTMX global CSRF token injection
+  // This avoids exposing the CSRF token in inline HTML attributes
+  document.body.addEventListener('htmx:configRequest', function(evt) {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+      evt.detail.headers['X-CSRFToken'] = csrfInput.value;
+    }
+  });
 </script>
 {% block extra_js %}{% endblock %}
 </body>

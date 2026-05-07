@@ -1,19 +1,17 @@
-"""
-apps/navigation/views.py  (Phase 2 - full web + API views)
-"""
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404, render, redirect
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from apps.markets.models import Market, Node, Edge
 from apps.vendors.models import Vendor, ProductCategory
 from apps.vendors.serializers import VendorListSerializer
 
 
-# ── API Views ────────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# API Views
+# ------------------------------------------------------------------
 
 class RouteView(APIView):
     def post(self, request):
@@ -56,14 +54,16 @@ class SearchAPIView(APIView):
         return Response({"query": query, "count": qs.count(), "results": VendorListSerializer(qs, many=True).data})
 
 
-# ── Web Views ────────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Web Views
+# ------------------------------------------------------------------
 
 def scan_view(request, qr_id):
-    """QR scan landing page — identifies current location."""
+    """QR scan landing page - identifies current location."""
     node   = get_object_or_404(Node, qr_id=qr_id, is_active=True)
     market = node.market
     vendor = getattr(node, "vendor", None)
-    all_nodes = Node.objects.filter(market=market, is_active=True).select_related("zone")
+    all_nodes = Node.objects.filter(market=market, is_active=True).select_related("zone").prefetch_related("vendor", "vendor__categories", "vendor__products")
     edges     = Edge.objects.filter(market=market, is_active=True).select_related("node_from", "node_to")
     return render(request, "navigation/scan.html", {
         "node": node, "market": market, "vendor": vendor,
@@ -99,7 +99,7 @@ def market_map_view(request, slug):
 
 
 def search_view(request):
-    """Search page — full page load."""
+    """Search page - full page load."""
     market_slug  = request.GET.get("market", "")
     from_node_id = request.GET.get("from", "")
     market = None
@@ -116,7 +116,7 @@ def search_view(request):
 
 
 def search_results_view(request):
-    """HTMX partial — returns search results fragment."""
+    """HTMX partial - returns search results fragment."""
     query        = request.GET.get("q", "").strip()
     market_slug  = request.GET.get("market", "").strip()
     from_node_id = request.GET.get("from", "")
@@ -126,7 +126,7 @@ def search_results_view(request):
     market_name = market_slug
     if market_slug:
         try:
-            market_obj  = Market.objects.get(slug=market_slug)
+            market_obj  = Market.objects.get(slug=market_slug, is_active=True)
             market_name = market_obj.name
         except Market.DoesNotExist:
             pass
@@ -158,19 +158,16 @@ def search_results_view(request):
 
 
 def landing_view(request):
-    """Homepage — lists all active markets with stats."""
+    """Homepage - lists all active markets with stats."""
     from apps.markets.models import Market
     from apps.vendors.models import Vendor
 
-    markets_qs = Market.objects.filter(is_active=True).prefetch_related("zones", "nodes", "vendors")
-
-    # Annotate with counts
-    markets = []
-    for m in markets_qs:
-        m.node_count   = m.nodes.filter(is_active=True).count()
-        m.vendor_count = m.vendors.filter(is_active=True).count()
-        m.zone_count   = m.zones.count()
-        markets.append(m)
+    # OPTIMIZED: Use annotate() with Count to avoid N+1 queries
+    markets = Market.objects.filter(is_active=True).annotate(
+        node_count=Count("nodes", filter=Q(nodes__is_active=True)),
+        vendor_count=Count("vendors", filter=Q(vendors__is_active=True)),
+        zone_count=Count("zones"),
+    ).prefetch_related("zones")
 
     total_vendors = Vendor.objects.filter(is_active=True).count()
 

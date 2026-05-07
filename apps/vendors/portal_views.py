@@ -1,21 +1,3 @@
-"""
-apps/vendors/portal_views.py
-
-Vendor self-service portal views.
-
-URL prefix: /portal/
-
-Routes:
-  GET/POST  /portal/login/              — vendor login
-  POST      /portal/logout/             — logout
-  GET       /portal/dashboard/          — overview (stats, stall info)
-  GET/POST  /portal/profile/            — edit business profile
-  GET       /portal/products/           — list own products
-  GET/POST  /portal/products/add/       — add product
-  GET/POST  /portal/products/<id>/edit/ — edit product
-  POST      /portal/products/<id>/delete/ — delete product
-"""
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -25,6 +7,7 @@ from django.http import HttpResponseForbidden
 from django.db.models import Count
 from django.utils import timezone
 from datetime import timedelta
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Vendor, Product, ProductCategory
 from .portal_forms import (
@@ -34,21 +17,25 @@ from .portal_forms import (
 )
 
 
-# ── Helpers ───────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------------
 
 def get_vendor_or_403(user):
-    """Return the vendor profile for this user, or raise 403."""
+    """Return the vendor profile for this user, or None."""
     try:
         return user.vendor_profile
     except Vendor.DoesNotExist:
         return None
 
 
-# ── Auth ──────────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Auth
+# ------------------------------------------------------------------
 
 def portal_login(request):
     """Vendor login page."""
-    # Already logged in and has a vendor profile → go to dashboard
+    # Already logged in and has a vendor profile -> go to dashboard
     if request.user.is_authenticated and get_vendor_or_403(request.user):
         return redirect("portal-dashboard")
 
@@ -64,6 +51,13 @@ def portal_login(request):
             if vendor and vendor.is_active:
                 login(request, user)
                 next_url = request.GET.get("next", "portal-dashboard")
+                # SECURITY: Validate redirect URL to prevent open redirect attacks
+                if not url_has_allowed_host_and_scheme(
+                    url=next_url,
+                    allowed_hosts={request.get_host()},
+                    require_https=request.is_secure(),
+                ):
+                    next_url = "portal-dashboard"
                 return redirect(next_url)
             elif vendor and not vendor.is_active:
                 form.add_error(None, "Your vendor account has been deactivated. Contact market management.")
@@ -82,11 +76,13 @@ def portal_logout(request):
     return redirect("portal-login")
 
 
-# ── Dashboard ─────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Dashboard
+# ------------------------------------------------------------------
 
 @login_required(login_url="portal-login")
 def portal_dashboard(request):
-    """Vendor dashboard — overview of profile, stall, recent stats."""
+    """Vendor dashboard - overview of profile, stall, recent stats."""
     vendor = get_vendor_or_403(request.user)
     if not vendor:
         return HttpResponseForbidden("No vendor profile linked to this account.")
@@ -109,7 +105,9 @@ def portal_dashboard(request):
     return render(request, "portal/dashboard.html", context)
 
 
-# ── Profile ───────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Profile
+# ------------------------------------------------------------------
 
 @login_required(login_url="portal-login")
 def portal_profile(request):
@@ -132,7 +130,9 @@ def portal_profile(request):
     return render(request, "portal/profile.html", {"form": form, "vendor": vendor})
 
 
-# ── Products ──────────────────────────────────────────────────────
+# ------------------------------------------------------------------
+# Products
+# ------------------------------------------------------------------
 
 @login_required(login_url="portal-login")
 def portal_products(request):
@@ -220,12 +220,14 @@ def portal_product_delete(request, product_id):
     return redirect("portal-products")
 
 
-# ── HTMX: toggle product availability ────────────────────────────
+# ------------------------------------------------------------------
+# HTMX: toggle product availability
+# ------------------------------------------------------------------
 
 @login_required(login_url="portal-login")
 @require_POST
 def portal_product_toggle(request, product_id):
-    """HTMX endpoint — toggle product availability inline."""
+    """HTMX endpoint - toggle product availability inline."""
     vendor = get_vendor_or_403(request.user)
     if not vendor:
         return HttpResponseForbidden()

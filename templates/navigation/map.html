@@ -208,7 +208,24 @@
         <path d="M60 0L0 0 0 60" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="1"/>
       </pattern>
     </defs>
+    <!-- Background map image (if uploaded) -->
+    {% if market.map_image %}
+    <image
+      href="{{ market.map_image.url }}"
+      x="0" y="0"
+      width="{{ market.map_width }}"
+      height="{{ market.map_height }}"
+      preserveAspectRatio="none"
+      style="opacity: 0.9;"
+    />
+    {% endif %}
+    <!-- Grid overlay for visual reference -->
     <rect width="100%" height="100%" fill="url(#grid)"/>
+
+    <!-- Subtle dark overlay for contrast when map image exists -->
+    {% if market.map_image %}
+    <rect width="100%" height="100%" fill="rgba(10,22,40,0.3)" style="pointer-events: none;"/>
+    {% endif %}
 
     <!-- Base path lines -->
     <g>{% for e in edges %}
@@ -533,13 +550,13 @@ function drawRoute(data) {
 
 // ── Show steps ───────────────────────────────────────────────────
 function showSteps(data) {
-  const dest  = data.node_labels[data.node_labels.length-1];
-  const start = data.node_labels[0];
+  const dest  = escapeHtml(data.node_labels[data.node_labels.length-1]);
+  const start = escapeHtml(data.node_labels[0]);
   const steps = data.steps.map((s,i)=>{
     const last = i===data.steps.length-1;
     return `<div class="step" style="animation-delay:${i*.05}s">
       <div class="step-n ${last?'final':''}">${i+1}</div>
-      <div class="step-t">${s}</div>
+      <div class="step-t">${escapeHtml(s)}</div>
     </div>`;
   }).join('');
 
@@ -547,7 +564,7 @@ function showSteps(data) {
     <div class="rh">
       <div class="rh-left">
         <div class="rt">To: ${dest}</div>
-        <div class="rd">From ${start} &nbsp;·&nbsp; ${data.distance}m &nbsp;·&nbsp; ${data.steps.length} steps</div>
+        <div class="rd">From ${start} &nbsp;·&nbsp; ${escapeHtml(data.distance)}m &nbsp;·&nbsp; ${data.steps.length} steps</div>
       </div>
       <button class="r-clear" onclick="clearRoute()">✕</button>
     </div>
@@ -603,6 +620,14 @@ function resetPanel() {
 function csrf() {
   const m=document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)');
   return m?m[2]:'';
+}
+
+// ── HTML Escape helper ───────────────────────────────────────────
+function escapeHtml(str) {
+  if (str == null) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
 }
 
 // ── Init ─────────────────────────────────────────────────────────

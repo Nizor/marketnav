@@ -1,0 +1,2183 @@
+{
+  "market": {
+    "name": "Balogun Market",
+    "slug": "balogun-market-lagos",
+    "city": "Lagos",
+    "state": "Lagos State",
+    "description": "One of the largest open-air markets in West Africa, located on Lagos Island. Known for fabrics, electronics, and foodstuffs.",
+    "address": "Balogun Street, Lagos Island, Lagos, Nigeria",
+    "map_width": 1200,
+    "map_height": 800,
+    "real_width_m": 240.0,
+    "real_height_m": 160.0,
+    "is_active": true
+  },
+  "zones": [
+    {
+      "name": "Foodstuffs Section",
+      "code": "FOOD",
+      "color_hex": "#FFECB3",
+      "description": "Fresh produce, grains, spices, and packaged foods"
+    },
+    {
+      "name": "Electronics Aisle",
+      "code": "ELEC",
+      "color_hex": "#E3F2FD",
+      "description": "Phones, accessories, small appliances"
+    },
+    {
+      "name": "Clothing Zone",
+      "code": "CLOTH",
+      "color_hex": "#F3E5F5",
+      "description": "Fabrics, ready-to-wear, traditional attire"
+    },
+    {
+      "name": "Accessories Corner",
+      "code": "ACC",
+      "color_hex": "#E8F5E9",
+      "description": "Jewelry, bags, watches, sunglasses"
+    },
+    {
+      "name": "Household Goods",
+      "code": "HOUSE",
+      "color_hex": "#FFF3E0",
+      "description": "Kitchenware, cleaning supplies, home decor"
+    },
+    {
+      "name": "Provisions Lane",
+      "code": "PROV",
+      "color_hex": "#FBE9E7",
+      "description": "Dry goods, beverages, toiletries"
+    }
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "label": "Stall 01",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 195.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "label": "Stall 02",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 195.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 3,
+      "label": "Stall 03",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 195.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "label": "Stall 04",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 195.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "label": "Stall 05",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 260.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "label": "Stall 06",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 260.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 7,
+      "label": "Stall 07",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 260.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 8,
+      "label": "Stall 08",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 260.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 9,
+      "label": "Stall 09",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 325.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 10,
+      "label": "Stall 10",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 325.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 11,
+      "label": "Stall 11",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 325.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 12,
+      "label": "Stall 12",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 325.0,
+      "zone_idx": 0,
+      "is_active": true
+    },
+    {
+      "id": 13,
+      "label": "Stall 13",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 505.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 14,
+      "label": "Stall 14",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 505.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 15,
+      "label": "Stall 15",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 505.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 16,
+      "label": "Stall 16",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 505.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 17,
+      "label": "Stall 17",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 570.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 18,
+      "label": "Stall 18",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 570.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 19,
+      "label": "Stall 19",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 570.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 20,
+      "label": "Stall 20",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 570.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 21,
+      "label": "Stall 21",
+      "node_type": "stall",
+      "x": 100.0,
+      "y": 635.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 22,
+      "label": "Stall 22",
+      "node_type": "stall",
+      "x": 175.0,
+      "y": 635.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 23,
+      "label": "Stall 23",
+      "node_type": "stall",
+      "x": 250.0,
+      "y": 635.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 24,
+      "label": "Stall 24",
+      "node_type": "stall",
+      "x": 325.0,
+      "y": 635.0,
+      "zone_idx": 1,
+      "is_active": true
+    },
+    {
+      "id": 25,
+      "label": "Stall 25",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 195.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 26,
+      "label": "Stall 26",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 195.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 27,
+      "label": "Stall 27",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 195.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 28,
+      "label": "Stall 28",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 195.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 29,
+      "label": "Stall 29",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 260.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 30,
+      "label": "Stall 30",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 260.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 31,
+      "label": "Stall 31",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 260.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 32,
+      "label": "Stall 32",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 260.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 33,
+      "label": "Stall 33",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 325.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 34,
+      "label": "Stall 34",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 325.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 35,
+      "label": "Stall 35",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 325.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 36,
+      "label": "Stall 36",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 325.0,
+      "zone_idx": 2,
+      "is_active": true
+    },
+    {
+      "id": 37,
+      "label": "Stall 37",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 505.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 38,
+      "label": "Stall 38",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 505.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 39,
+      "label": "Stall 39",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 505.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 40,
+      "label": "Stall 40",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 505.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 41,
+      "label": "Stall 41",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 570.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 42,
+      "label": "Stall 42",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 570.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 43,
+      "label": "Stall 43",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 570.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 44,
+      "label": "Stall 44",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 570.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 45,
+      "label": "Stall 45",
+      "node_type": "stall",
+      "x": 475.0,
+      "y": 635.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 46,
+      "label": "Stall 46",
+      "node_type": "stall",
+      "x": 550.0,
+      "y": 635.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 47,
+      "label": "Stall 47",
+      "node_type": "stall",
+      "x": 625.0,
+      "y": 635.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 48,
+      "label": "Stall 48",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 635.0,
+      "zone_idx": 3,
+      "is_active": true
+    },
+    {
+      "id": 49,
+      "label": "Stall 49",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 195.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 50,
+      "label": "Stall 50",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 195.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 51,
+      "label": "Stall 51",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 195.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 52,
+      "label": "Stall 52",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 195.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 53,
+      "label": "Stall 53",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 260.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 54,
+      "label": "Stall 54",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 260.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 55,
+      "label": "Stall 55",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 260.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 56,
+      "label": "Stall 56",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 260.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 57,
+      "label": "Stall 57",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 325.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 58,
+      "label": "Stall 58",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 325.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 59,
+      "label": "Stall 59",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 325.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 60,
+      "label": "Stall 60",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 325.0,
+      "zone_idx": 4,
+      "is_active": true
+    },
+    {
+      "id": 61,
+      "label": "Stall 61",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 505.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 62,
+      "label": "Stall 62",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 505.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 63,
+      "label": "Stall 63",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 505.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 64,
+      "label": "Stall 64",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 505.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 65,
+      "label": "Stall 65",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 570.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 66,
+      "label": "Stall 66",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 570.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 67,
+      "label": "Stall 67",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 570.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 68,
+      "label": "Stall 68",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 570.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 69,
+      "label": "Stall 69",
+      "node_type": "stall",
+      "x": 850.0,
+      "y": 635.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 70,
+      "label": "Stall 70",
+      "node_type": "stall",
+      "x": 925.0,
+      "y": 635.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 71,
+      "label": "Stall 71",
+      "node_type": "stall",
+      "x": 1000.0,
+      "y": 635.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 72,
+      "label": "Stall 72",
+      "node_type": "stall",
+      "x": 1075.0,
+      "y": 635.0,
+      "zone_idx": 5,
+      "is_active": true
+    },
+    {
+      "id": 73,
+      "label": "Main Entrance",
+      "node_type": "entrance",
+      "x": 600.0,
+      "y": 50.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 74,
+      "label": "Exit A",
+      "node_type": "exit",
+      "x": 100.0,
+      "y": 760.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 75,
+      "label": "Exit B",
+      "node_type": "exit",
+      "x": 1150.0,
+      "y": 760.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 76,
+      "label": "Exit C",
+      "node_type": "exit",
+      "x": 1200.0,
+      "y": 410.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 77,
+      "label": "Restroom",
+      "node_type": "amenity",
+      "x": 390.0,
+      "y": 767.5,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 78,
+      "label": "ATM",
+      "node_type": "amenity",
+      "x": 790.0,
+      "y": 767.5,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 79,
+      "label": "Junction A",
+      "node_type": "intersection",
+      "x": 410.0,
+      "y": 300.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 80,
+      "label": "Junction B",
+      "node_type": "intersection",
+      "x": 410.0,
+      "y": 570.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 81,
+      "label": "Junction C",
+      "node_type": "intersection",
+      "x": 785.0,
+      "y": 300.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 82,
+      "label": "Junction D",
+      "node_type": "intersection",
+      "x": 785.0,
+      "y": 570.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 83,
+      "label": "Junction E",
+      "node_type": "intersection",
+      "x": 600.0,
+      "y": 410.0,
+      "zone_idx": null,
+      "is_active": true
+    },
+    {
+      "id": 84,
+      "label": "Junction F",
+      "node_type": "intersection",
+      "x": 600.0,
+      "y": 100.0,
+      "zone_idx": null,
+      "is_active": true
+    }
+  ],
+  "edges": [
+    {
+      "id": 1,
+      "node_from": 1,
+      "node_to": 2,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 2,
+      "node_from": 1,
+      "node_to": 5,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 3,
+      "node_from": 2,
+      "node_to": 3,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "node_from": 2,
+      "node_to": 6,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "node_from": 3,
+      "node_to": 4,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "node_from": 3,
+      "node_to": 7,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 7,
+      "node_from": 4,
+      "node_to": 8,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 8,
+      "node_from": 5,
+      "node_to": 6,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 9,
+      "node_from": 5,
+      "node_to": 9,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 10,
+      "node_from": 6,
+      "node_to": 7,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 11,
+      "node_from": 6,
+      "node_to": 10,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 12,
+      "node_from": 7,
+      "node_to": 8,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 13,
+      "node_from": 7,
+      "node_to": 11,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 14,
+      "node_from": 8,
+      "node_to": 12,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 15,
+      "node_from": 9,
+      "node_to": 10,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 16,
+      "node_from": 10,
+      "node_to": 11,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 17,
+      "node_from": 11,
+      "node_to": 12,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 18,
+      "node_from": 13,
+      "node_to": 14,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 19,
+      "node_from": 13,
+      "node_to": 17,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 20,
+      "node_from": 14,
+      "node_to": 15,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 21,
+      "node_from": 14,
+      "node_to": 18,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 22,
+      "node_from": 15,
+      "node_to": 16,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 23,
+      "node_from": 15,
+      "node_to": 19,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 24,
+      "node_from": 16,
+      "node_to": 20,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 25,
+      "node_from": 17,
+      "node_to": 18,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 26,
+      "node_from": 17,
+      "node_to": 21,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 27,
+      "node_from": 18,
+      "node_to": 19,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 28,
+      "node_from": 18,
+      "node_to": 22,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 29,
+      "node_from": 19,
+      "node_to": 20,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 30,
+      "node_from": 19,
+      "node_to": 23,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 31,
+      "node_from": 20,
+      "node_to": 24,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 32,
+      "node_from": 21,
+      "node_to": 22,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 33,
+      "node_from": 22,
+      "node_to": 23,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 34,
+      "node_from": 23,
+      "node_to": 24,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 35,
+      "node_from": 25,
+      "node_to": 26,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 36,
+      "node_from": 25,
+      "node_to": 29,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 37,
+      "node_from": 26,
+      "node_to": 27,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 38,
+      "node_from": 26,
+      "node_to": 30,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 39,
+      "node_from": 27,
+      "node_to": 28,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 40,
+      "node_from": 27,
+      "node_to": 31,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 41,
+      "node_from": 28,
+      "node_to": 32,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 42,
+      "node_from": 29,
+      "node_to": 30,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 43,
+      "node_from": 29,
+      "node_to": 33,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 44,
+      "node_from": 30,
+      "node_to": 31,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 45,
+      "node_from": 30,
+      "node_to": 34,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 46,
+      "node_from": 31,
+      "node_to": 32,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 47,
+      "node_from": 31,
+      "node_to": 35,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 48,
+      "node_from": 32,
+      "node_to": 36,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 49,
+      "node_from": 33,
+      "node_to": 34,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 50,
+      "node_from": 34,
+      "node_to": 35,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 51,
+      "node_from": 35,
+      "node_to": 36,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 52,
+      "node_from": 37,
+      "node_to": 38,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 53,
+      "node_from": 37,
+      "node_to": 41,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 54,
+      "node_from": 38,
+      "node_to": 39,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 55,
+      "node_from": 38,
+      "node_to": 42,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 56,
+      "node_from": 39,
+      "node_to": 40,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 57,
+      "node_from": 39,
+      "node_to": 43,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 58,
+      "node_from": 40,
+      "node_to": 44,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 59,
+      "node_from": 41,
+      "node_to": 42,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 60,
+      "node_from": 41,
+      "node_to": 45,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 61,
+      "node_from": 42,
+      "node_to": 43,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 62,
+      "node_from": 42,
+      "node_to": 46,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 63,
+      "node_from": 43,
+      "node_to": 44,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 64,
+      "node_from": 43,
+      "node_to": 47,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 65,
+      "node_from": 44,
+      "node_to": 48,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 66,
+      "node_from": 45,
+      "node_to": 46,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 67,
+      "node_from": 46,
+      "node_to": 47,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 68,
+      "node_from": 47,
+      "node_to": 48,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 69,
+      "node_from": 49,
+      "node_to": 50,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 70,
+      "node_from": 49,
+      "node_to": 53,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 71,
+      "node_from": 50,
+      "node_to": 51,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 72,
+      "node_from": 50,
+      "node_to": 54,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 73,
+      "node_from": 51,
+      "node_to": 52,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 74,
+      "node_from": 51,
+      "node_to": 55,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 75,
+      "node_from": 52,
+      "node_to": 56,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 76,
+      "node_from": 53,
+      "node_to": 54,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 77,
+      "node_from": 53,
+      "node_to": 57,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 78,
+      "node_from": 54,
+      "node_to": 55,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 79,
+      "node_from": 54,
+      "node_to": 58,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 80,
+      "node_from": 55,
+      "node_to": 56,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 81,
+      "node_from": 55,
+      "node_to": 59,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 82,
+      "node_from": 56,
+      "node_to": 60,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 83,
+      "node_from": 57,
+      "node_to": 58,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 84,
+      "node_from": 58,
+      "node_to": 59,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 85,
+      "node_from": 59,
+      "node_to": 60,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 86,
+      "node_from": 61,
+      "node_to": 62,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 87,
+      "node_from": 61,
+      "node_to": 65,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 88,
+      "node_from": 62,
+      "node_to": 63,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 89,
+      "node_from": 62,
+      "node_to": 66,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 90,
+      "node_from": 63,
+      "node_to": 64,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 91,
+      "node_from": 63,
+      "node_to": 67,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 92,
+      "node_from": 64,
+      "node_to": 68,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 93,
+      "node_from": 65,
+      "node_to": 66,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 94,
+      "node_from": 65,
+      "node_to": 69,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 95,
+      "node_from": 66,
+      "node_to": 67,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 96,
+      "node_from": 66,
+      "node_to": 70,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 97,
+      "node_from": 67,
+      "node_to": 68,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 98,
+      "node_from": 67,
+      "node_to": 71,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 99,
+      "node_from": 68,
+      "node_to": 72,
+      "weight": 13.0,
+      "is_active": true
+    },
+    {
+      "id": 100,
+      "node_from": 69,
+      "node_to": 70,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 101,
+      "node_from": 70,
+      "node_to": 71,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 102,
+      "node_from": 71,
+      "node_to": 72,
+      "weight": 15.0,
+      "is_active": true
+    },
+    {
+      "id": 103,
+      "node_from": 9,
+      "node_to": 79,
+      "weight": 62.2,
+      "is_active": true
+    },
+    {
+      "id": 104,
+      "node_from": 10,
+      "node_to": 79,
+      "weight": 47.3,
+      "is_active": true
+    },
+    {
+      "id": 105,
+      "node_from": 11,
+      "node_to": 79,
+      "weight": 32.4,
+      "is_active": true
+    },
+    {
+      "id": 106,
+      "node_from": 12,
+      "node_to": 79,
+      "weight": 17.7,
+      "is_active": true
+    },
+    {
+      "id": 107,
+      "node_from": 21,
+      "node_to": 80,
+      "weight": 63.3,
+      "is_active": true
+    },
+    {
+      "id": 108,
+      "node_from": 22,
+      "node_to": 80,
+      "weight": 48.8,
+      "is_active": true
+    },
+    {
+      "id": 109,
+      "node_from": 23,
+      "node_to": 80,
+      "weight": 34.5,
+      "is_active": true
+    },
+    {
+      "id": 110,
+      "node_from": 24,
+      "node_to": 80,
+      "weight": 21.4,
+      "is_active": true
+    },
+    {
+      "id": 111,
+      "node_from": 25,
+      "node_to": 79,
+      "weight": 24.7,
+      "is_active": true
+    },
+    {
+      "id": 112,
+      "node_from": 26,
+      "node_to": 79,
+      "weight": 35.0,
+      "is_active": true
+    },
+    {
+      "id": 113,
+      "node_from": 27,
+      "node_to": 79,
+      "weight": 47.9,
+      "is_active": true
+    },
+    {
+      "id": 114,
+      "node_from": 28,
+      "node_to": 79,
+      "weight": 61.7,
+      "is_active": true
+    },
+    {
+      "id": 115,
+      "node_from": 33,
+      "node_to": 81,
+      "weight": 62.2,
+      "is_active": true
+    },
+    {
+      "id": 116,
+      "node_from": 34,
+      "node_to": 81,
+      "weight": 47.3,
+      "is_active": true
+    },
+    {
+      "id": 117,
+      "node_from": 35,
+      "node_to": 81,
+      "weight": 32.4,
+      "is_active": true
+    },
+    {
+      "id": 118,
+      "node_from": 36,
+      "node_to": 81,
+      "weight": 17.7,
+      "is_active": true
+    },
+    {
+      "id": 119,
+      "node_from": 37,
+      "node_to": 80,
+      "weight": 18.4,
+      "is_active": true
+    },
+    {
+      "id": 120,
+      "node_from": 38,
+      "node_to": 80,
+      "weight": 30.9,
+      "is_active": true
+    },
+    {
+      "id": 121,
+      "node_from": 39,
+      "node_to": 80,
+      "weight": 44.9,
+      "is_active": true
+    },
+    {
+      "id": 122,
+      "node_from": 40,
+      "node_to": 80,
+      "weight": 59.4,
+      "is_active": true
+    },
+    {
+      "id": 123,
+      "node_from": 45,
+      "node_to": 82,
+      "weight": 63.3,
+      "is_active": true
+    },
+    {
+      "id": 124,
+      "node_from": 46,
+      "node_to": 82,
+      "weight": 48.8,
+      "is_active": true
+    },
+    {
+      "id": 125,
+      "node_from": 47,
+      "node_to": 82,
+      "weight": 34.5,
+      "is_active": true
+    },
+    {
+      "id": 126,
+      "node_from": 48,
+      "node_to": 82,
+      "weight": 21.4,
+      "is_active": true
+    },
+    {
+      "id": 127,
+      "node_from": 49,
+      "node_to": 81,
+      "weight": 24.7,
+      "is_active": true
+    },
+    {
+      "id": 128,
+      "node_from": 50,
+      "node_to": 81,
+      "weight": 35.0,
+      "is_active": true
+    },
+    {
+      "id": 129,
+      "node_from": 51,
+      "node_to": 81,
+      "weight": 47.9,
+      "is_active": true
+    },
+    {
+      "id": 130,
+      "node_from": 52,
+      "node_to": 81,
+      "weight": 61.7,
+      "is_active": true
+    },
+    {
+      "id": 131,
+      "node_from": 61,
+      "node_to": 82,
+      "weight": 18.4,
+      "is_active": true
+    },
+    {
+      "id": 132,
+      "node_from": 62,
+      "node_to": 82,
+      "weight": 30.9,
+      "is_active": true
+    },
+    {
+      "id": 133,
+      "node_from": 63,
+      "node_to": 82,
+      "weight": 44.9,
+      "is_active": true
+    },
+    {
+      "id": 134,
+      "node_from": 64,
+      "node_to": 82,
+      "weight": 59.4,
+      "is_active": true
+    },
+    {
+      "id": 135,
+      "node_from": 79,
+      "node_to": 80,
+      "weight": 54.0,
+      "is_active": true
+    },
+    {
+      "id": 136,
+      "node_from": 81,
+      "node_to": 82,
+      "weight": 54.0,
+      "is_active": true
+    },
+    {
+      "id": 137,
+      "node_from": 79,
+      "node_to": 81,
+      "weight": 75.0,
+      "is_active": true
+    },
+    {
+      "id": 138,
+      "node_from": 80,
+      "node_to": 82,
+      "weight": 75.0,
+      "is_active": true
+    },
+    {
+      "id": 139,
+      "node_from": 79,
+      "node_to": 83,
+      "weight": 43.9,
+      "is_active": true
+    },
+    {
+      "id": 140,
+      "node_from": 81,
+      "node_to": 83,
+      "weight": 43.0,
+      "is_active": true
+    },
+    {
+      "id": 141,
+      "node_from": 84,
+      "node_to": 79,
+      "weight": 55.2,
+      "is_active": true
+    },
+    {
+      "id": 142,
+      "node_from": 84,
+      "node_to": 81,
+      "weight": 54.5,
+      "is_active": true
+    },
+    {
+      "id": 143,
+      "node_from": 73,
+      "node_to": 84,
+      "weight": 10.0,
+      "is_active": true
+    },
+    {
+      "id": 144,
+      "node_from": 74,
+      "node_to": 80,
+      "weight": 72.7,
+      "is_active": true
+    },
+    {
+      "id": 145,
+      "node_from": 75,
+      "node_to": 82,
+      "weight": 82.3,
+      "is_active": true
+    },
+    {
+      "id": 146,
+      "node_from": 76,
+      "node_to": 81,
+      "weight": 85.9,
+      "is_active": true
+    },
+    {
+      "id": 147,
+      "node_from": 77,
+      "node_to": 80,
+      "weight": 39.7,
+      "is_active": true
+    },
+    {
+      "id": 148,
+      "node_from": 78,
+      "node_to": 82,
+      "weight": 39.5,
+      "is_active": true
+    }
+  ],
+  "vendors": [
+    {
+      "id": 1,
+      "business_name": "Amina Fabrics",
+      "owner_name": "Owner 1",
+      "description": "Beautiful Ankara and lace fabrics",
+      "phone": "+2348056625524",
+      "whatsapp": "+2348089313325",
+      "email": "vendor1@example.com",
+      "categories": [
+        "Clothing"
+      ],
+      "node_id": 32,
+      "products": [
+        {
+          "name": "Ankara Fabric (6 yards)",
+          "price": 3500.0,
+          "is_available": true
+        },
+        {
+          "name": "Lace Material (5 yards)",
+          "price": 8500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "business_name": "Chukwu Electronics",
+      "owner_name": "Owner 2",
+      "description": "Phone accessories and chargers",
+      "phone": "+2348026155538",
+      "whatsapp": "+2348051698389",
+      "email": "vendor2@example.com",
+      "categories": [
+        "Electronics"
+      ],
+      "node_id": 23,
+      "products": [
+        {
+          "name": "iPhone Charger",
+          "price": 2500.0,
+          "is_available": true
+        },
+        {
+          "name": "Earbuds",
+          "price": 4500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "business_name": "Mama Nkechi Store",
+      "owner_name": "Owner 3",
+      "description": "Fresh vegetables and palm oil",
+      "phone": "+2348084198470",
+      "whatsapp": "+2348098245953",
+      "email": "vendor3@example.com",
+      "categories": [
+        "Foodstuffs"
+      ],
+      "node_id": 7,
+      "products": [
+        {
+          "name": "Palm Oil (1L)",
+          "price": 1200.0,
+          "is_available": true
+        },
+        {
+          "name": "Fresh Tomatoes (basket)",
+          "price": 2500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "business_name": "Baba Oloye Provisions",
+      "owner_name": "Owner 4",
+      "description": "Rice, beans, and dry goods",
+      "phone": "+2348015767002",
+      "whatsapp": "+2348080208112",
+      "email": "vendor4@example.com",
+      "categories": [
+        "Provisions"
+      ],
+      "node_id": 64,
+      "products": [
+        {
+          "name": "Long Grain Rice (50kg)",
+          "price": 45000.0,
+          "is_available": true
+        },
+        {
+          "name": "Coca-Cola (crate)",
+          "price": 1800.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "business_name": "Kemi Accessories",
+      "owner_name": "Owner 5",
+      "description": "Handbags and jewelry",
+      "phone": "+2348033429611",
+      "whatsapp": "+2348025231726",
+      "email": "vendor5@example.com",
+      "categories": [
+        "Accessories"
+      ],
+      "node_id": 48,
+      "products": [
+        {
+          "name": "Leather Handbag",
+          "price": 7500.0,
+          "is_available": true
+        },
+        {
+          "name": "Gold-plated Necklace",
+          "price": 3200.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "business_name": "Oga Kitchenware",
+      "owner_name": "Owner 6",
+      "description": "Pots, pans, and utensils",
+      "phone": "+2348078701728",
+      "whatsapp": "+2348051952482",
+      "email": "vendor6@example.com",
+      "categories": [
+        "Household"
+      ],
+      "node_id": 57,
+      "products": [
+        {
+          "name": "Non-stick Pot Set",
+          "price": 12000.0,
+          "is_available": true
+        },
+        {
+          "name": "Floor Mop",
+          "price": 2500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "business_name": "Ngozi Fashion",
+      "owner_name": "Owner 7",
+      "description": "Ready-to-wear traditional attire",
+      "phone": "+2348082243076",
+      "whatsapp": "+2348093445080",
+      "email": "vendor7@example.com",
+      "categories": [
+        "Clothing"
+      ],
+      "node_id": 27,
+      "products": [
+        {
+          "name": "Ankara Fabric (6 yards)",
+          "price": 3500.0,
+          "is_available": true
+        },
+        {
+          "name": "Lace Material (5 yards)",
+          "price": 8500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "business_name": "Tech Hub Lagos",
+      "owner_name": "Owner 8",
+      "description": "Laptops and phone repairs",
+      "phone": "+2348030456870",
+      "whatsapp": "+2348081116421",
+      "email": "vendor8@example.com",
+      "categories": [
+        "Electronics"
+      ],
+      "node_id": 21,
+      "products": [
+        {
+          "name": "iPhone Charger",
+          "price": 2500.0,
+          "is_available": true
+        },
+        {
+          "name": "Earbuds",
+          "price": 4500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "business_name": "Alhaji Spice Market",
+      "owner_name": "Owner 9",
+      "description": "Spices, seasonings, and herbs",
+      "phone": "+2348041391138",
+      "whatsapp": "+2348015300359",
+      "email": "vendor9@example.com",
+      "categories": [
+        "Foodstuffs"
+      ],
+      "node_id": 12,
+      "products": [
+        {
+          "name": "Palm Oil (1L)",
+          "price": 1200.0,
+          "is_available": true
+        },
+        {
+          "name": "Fresh Tomatoes (basket)",
+          "price": 2500.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "business_name": "Dele Drinks",
+      "owner_name": "Owner 10",
+      "description": "Soft drinks and bottled water",
+      "phone": "+2348041499059",
+      "whatsapp": "+2348090841716",
+      "email": "vendor10@example.com",
+      "categories": [
+        "Provisions"
+      ],
+      "node_id": 66,
+      "products": [
+        {
+          "name": "Long Grain Rice (50kg)",
+          "price": 45000.0,
+          "is_available": true
+        },
+        {
+          "name": "Coca-Cola (crate)",
+          "price": 1800.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "business_name": "Ade Bags & Shoes",
+      "owner_name": "Owner 11",
+      "description": "Leather bags and quality shoes",
+      "phone": "+2348016183440",
+      "whatsapp": "+2348044555931",
+      "email": "vendor11@example.com",
+      "categories": [
+        "Accessories"
+      ],
+      "node_id": 39,
+      "products": [
+        {
+          "name": "Leather Handbag",
+          "price": 7500.0,
+          "is_available": true
+        },
+        {
+          "name": "Gold-plated Necklace",
+          "price": 3200.0,
+          "is_available": true
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "business_name": "Clean Home Supplies",
+      "owner_name": "Owner 12",
+      "description": "Detergents and cleaning tools",
+      "phone": "+2348061050064",
+      "whatsapp": "+2348074685255",
+      "email": "vendor12@example.com",
+      "categories": [
+        "Household"
+      ],
+      "node_id": 50,
+      "products": [
+        {
+          "name": "Non-stick Pot Set",
+          "price": 12000.0,
+          "is_available": true
+        },
+        {
+          "name": "Floor Mop",
+          "price": 2500.0,
+          "is_available": true
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "name": "Foodstuffs",
+      "icon": "🍅",
+      "description": "Fresh produce, grains, spices"
+    },
+    {
+      "name": "Electronics",
+      "icon": "📱",
+      "description": "Phones, gadgets, accessories"
+    },
+    {
+      "name": "Clothing",
+      "icon": "👗",
+      "description": "Fabrics, garments, fashion"
+    },
+    {
+      "name": "Accessories",
+      "icon": "👜",
+      "description": "Bags, jewelry, watches"
+    },
+    {
+      "name": "Household",
+      "icon": "🏠",
+      "description": "Kitchenware, cleaning, decor"
+    },
+    {
+      "name": "Provisions",
+      "icon": "🧴",
+      "description": "Dry goods, beverages, toiletries"
+    }
+  ]
+}

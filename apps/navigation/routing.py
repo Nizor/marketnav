@@ -1,20 +1,3 @@
-"""
-apps/navigation/routing.py
-
-MarketGraph — builds an in-memory graph from a Market's Nodes and Edges,
-then runs A* (with Euclidean heuristic) to find the shortest path between
-any two nodes. Falls back to Dijkstra when no heuristic can be applied.
-
-Usage:
-    graph = MarketGraph(market)
-    result = graph.route(from_node_id, to_node_id)
-    # result = {
-    #   "path": [node_id, ...],
-    #   "distance": 42.5,
-    #   "steps": ["Walk straight 8m to Junction B3", "Turn right into Zone C", ...],
-    # }
-"""
-
 import math
 import heapq
 from dataclasses import dataclass, field
@@ -59,7 +42,7 @@ class MarketGraph:
     def __init__(self, market: Market):
         self.market = market
         self._nodes: Dict[int, GraphNode] = {}
-        self._adjacency: Dict[int, List[Tuple[int, float]]] = {}  # node_id → [(neighbour_id, weight)]
+        self._adjacency: Dict[int, List[Tuple[int, float]]] = {}  # node_id -> [(neighbour_id, weight)]
         self._build()
 
     def _build(self):
@@ -89,10 +72,19 @@ class MarketGraph:
     # ------------------------------------------------------------------
 
     def _heuristic(self, a_id: int, b_id: int) -> float:
-        """Euclidean distance between two graph nodes (map coordinate units)."""
+        """
+        Euclidean distance between two graph nodes, converted to metres.
+
+        Uses the market's scale factors (real_width_m / map_width) to convert
+        map coordinate units to real-world metres. This ensures the heuristic
+        is admissible (never overestimates) when edge weights are in metres.
+        """
         a = self._nodes[a_id]
         b = self._nodes[b_id]
-        return math.hypot(a.x - b.x, a.y - b.y)
+        # Convert map units to metres using market's coordinate scale
+        dx = (a.x - b.x) * self.market.scale_x
+        dy = (a.y - b.y) * self.market.scale_y
+        return math.hypot(dx, dy)
 
     # ------------------------------------------------------------------
     # A* pathfinding
@@ -189,7 +181,10 @@ class MarketGraph:
         for i in range(len(path) - 1):
             a = self._nodes[path[i]]
             b = self._nodes[path[i + 1]]
-            distance = round(math.hypot(b.x - a.x, b.y - a.y))
+            # Calculate distance in metres using scale factors
+            dx = (b.x - a.x) * self.market.scale_x
+            dy = (b.y - a.y) * self.market.scale_y
+            distance = round(math.hypot(dx, dy))
             curr_bearing = self._bearing(a, b)
             cardinal = self._bearing_to_direction(curr_bearing)
             turn = self._turn_instruction(prev_bearing, curr_bearing)
@@ -198,7 +193,7 @@ class MarketGraph:
             is_last = (i == len(path) - 2)
 
             if is_last:
-                step = f"{turn} {distance}m {cardinal}{zone_note} — arrive at {b.label}"
+                step = f"{turn} {distance}m {cardinal}{zone_note} - arrive at {b.label}"
             else:
                 step = f"{turn} {distance}m {cardinal}{zone_note} toward {b.label}"
 
