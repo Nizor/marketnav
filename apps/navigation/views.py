@@ -2,9 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404, render, redirect
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Subquery, OuterRef
 
-from apps.markets.models import Market, Node, Edge
+from apps.markets.models import Market, Node, Edge, Zone
 from apps.vendors.models import Vendor, ProductCategory
 from apps.vendors.serializers import VendorListSerializer
 
@@ -162,12 +162,33 @@ def landing_view(request):
     from apps.markets.models import Market
     from apps.vendors.models import Vendor
 
-    # OPTIMIZED: Use annotate() with Count to avoid N+1 queries
+    # OPTIMIZED: Use Subquery to avoid JOIN explosion and get accurate counts
+    # Subquery doesn't create JOINs, so no duplicate row multiplication
     markets = Market.objects.filter(is_active=True).annotate(
-        node_count=Count("nodes", filter=Q(nodes__is_active=True)),
-        vendor_count=Count("vendors", filter=Q(vendors__is_active=True)),
-        zone_count=Count("zones"),
-    ).prefetch_related("zones")
+        node_count=Subquery(
+            Node.objects.filter(
+                market=OuterRef('pk'),
+                is_active=True
+            ).values('market').annotate(
+                count=Count('id')
+            ).values('count')
+        ),
+        vendor_count=Subquery(
+            Vendor.objects.filter(
+                market=OuterRef('pk'),
+                is_active=True
+            ).values('market').annotate(
+                count=Count('id')
+            ).values('count')
+        ),
+        zone_count=Subquery(
+            Zone.objects.filter(
+                market=OuterRef('pk')
+            ).values('market').annotate(
+                count=Count('id')
+            ).values('count')
+        ),
+    )
 
     total_vendors = Vendor.objects.filter(is_active=True).count()
 
