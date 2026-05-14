@@ -89,10 +89,16 @@
     width: 100%; height: 100%;
     cursor: grab; user-select: none;
   }
-  #map-svg:active { cursor: grabbing; }1000
+  #map-svg:active { cursor: grabbing; }
 
-  /* ========== EDGES ========== */1000
-  .edge-bg { stroke: #d5d5d5; stroke-width: 12; stroke-linecap: round; }
+  /* ========== EDGES (aisles) ========== */
+  .edge-fg {
+    stroke: #5f6368;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 6 4;
+    stroke-opacity: 0.8;
+  }
 
   /* ========== ROUTE LAYERS ========== */
   #route-shadow { stroke: rgba(26,115,232,0.2); stroke-width: 22; stroke-linecap: round; fill: none; display: none; }
@@ -304,8 +310,9 @@
            preserveAspectRatio="xMidYMid meet" style="pointer-events: none;" />
     {% endif %}
 
+    <!-- Aisle connectors – clearly visible dotted lines -->
     <g>{% for e in edges %}
-      <line class="edge-bg" x1="{{ e.node_from.x }}" y1="{{ e.node_from.y }}" x2="{{ e.node_to.x }}" y2="{{ e.node_to.y }}"/>
+      <line class="edge-fg" x1="{{ e.node_from.x }}" y1="{{ e.node_from.y }}" x2="{{ e.node_to.x }}" y2="{{ e.node_to.y }}"/>
     {% endfor %}</g>
 
     <polyline id="route-shadow" points=""/>
@@ -453,7 +460,7 @@ function setScale(newScale, cx, cy) {
   sc = Math.min(5, Math.max(0.4, newScale));
   px = cx - (cx - px) * (sc / old);
   py = cy - (cy - py) * (sc / old);
-  applyTransform();   // use clamped version during user interaction
+  applyTransform();
 }
 
 function zoomIn()  { cancelAllMovement(); setScale(sc * 1.4); }
@@ -465,7 +472,7 @@ function fitMap() {
   sc = Math.min(r.width / MAP_W, r.height / MAP_H) * 0.88;
   px = (r.width - MAP_W * sc) / 2;
   py = (r.height - MAP_H * sc) / 2;
-  applyTransformUnclamped();   // initial fit – no clamping
+  applyTransformUnclamped();
 }
 
 // ── Pan / touch events ──────────────────────────────────────────
@@ -493,7 +500,7 @@ window.addEventListener('mousemove', (e) => {
   if (dt > 0) { vx = dx/dt*16; vy = dy/dt*16; }
   lastTime = now;
   px += dx; py += dy; mx = e.clientX; my = e.clientY;
-  applyTransform();   // clamped panning
+  applyTransform();
 });
 window.addEventListener('mouseup', endPan);
 
@@ -536,7 +543,6 @@ function endPan() {
   }
 }
 
-// Place this right after the inertia / endPan code
 function cancelAllMovement() {
   drag = false;
   moved = false;
@@ -581,7 +587,7 @@ function centerOnStart() {
     if (!r.width) return;
     px = r.width/2 - x * sc;
     py = r.height/2 - y * sc;
-    applyTransform();   // clamped, but that's okay; we want to keep it inside bounds
+    applyTransform();
     showToast('📍 Recentered on your location');
   } else {
     showToast('Set your location first');
@@ -730,7 +736,7 @@ function showSteps(data) {
 function startNav(dest, start, dist) {
   showToast(`🧭 Follow the blue line to ${dest}`);
   document.getElementById('bottom-panel').scrollTop = 0;
-  fitMap();   // use unclamped fit to show the whole route
+  fitMap();
 }
 
 // ── Voice Guidance ──────────────────────────────────────────────
@@ -870,40 +876,34 @@ function getNavHeight() {
   return nav ? nav.offsetHeight : 56;
 }
 
-let fitReady = false;   // flag to prevent early fits
+let fitReady = false;
 
 function safeFitMap() {
   const r = box.getBoundingClientRect();
-  if (r.width < 100 || r.height < 100) return; // not ready
-  // Force exact container height (address bar may have changed)
+  if (r.width < 100 || r.height < 100) return;
   const navH = getNavHeight();
   const windowHeight = window.innerHeight;
   const main = document.querySelector('main');
   if (main) main.style.height = `${windowHeight - navH}px`;
   box.style.height = `${windowHeight - navH}px`;
 
-  // Now fit (unclamped) with a requestAnimationFrame to ensure layout is done
   requestAnimationFrame(() => {
-    fitMap();   // uses applyTransformUnclamped
+    fitMap();
     fitReady = true;
   });
 }
 
-// Run after everything is painted – multiple attempts if needed
 function initMap() {
   if (fitReady) return;
   safeFitMap();
   if (!fitReady) {
-    // Retry after a short delay (layout not yet stable)
     setTimeout(initMap, 200);
   }
 }
 
-// On load: start the retry loop
 window.addEventListener('load', () => {
   setTimeout(initMap, 200);
   
-  // After fit is ready, we can listen to resize events
   window.addEventListener('resize', () => {
     if (fitReady) {
       clearTimeout(window._resizeTimer);
@@ -916,7 +916,6 @@ window.addEventListener('load', () => {
     }
   });
 
-  // Auto-route if params present (only after map is correctly positioned)
   if (INIT_TO && fromId && INIT_TO !== fromId) {
     function routeWhenReady() {
       if (fitReady) {
