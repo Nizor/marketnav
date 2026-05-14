@@ -226,11 +226,37 @@
 
   /* ========== BOTTOM PANEL (route & list) ========== */
   #bottom-panel {
-    flex: 3;
+    flex: 0 0 auto;                     /* collapsed by default */
     position: relative; z-index: 10;
     background: white; border-top: 1px solid #dadce0;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overflow: hidden;
+    transition: flex 0.3s ease;         /* smooth expand/collapse */
+    max-height: 55vh;                  /* safety limit when expanded */
   }
+
+  #bottom-panel.expanded {
+    flex: 3;                            /* 30% when open */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide the inner content when collapsed (except the handle) */
+  #panel-content {
+    display: none;
+  }
+  #bottom-panel.expanded #panel-content {
+    display: block;
+  }
+
+  /* Make the handle look tappable */
+  .handle {
+    width: 40px; height: 4px; background: #dadce0;
+    border-radius: 2px; margin: 10px auto;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .handle:hover { background: #9aa0a6; }
+
   .handle { width: 40px; height: 4px; background: #dadce0; border-radius: 2px; margin: 10px auto 0; }
   .p-empty { padding: 20px; text-align: center; color: #5f6368; font-size: .875rem; }
   .p-empty strong { display: block; font-family: var(--ff-display); font-size: .95rem; color: #202124; margin-bottom: 4px; }
@@ -361,7 +387,6 @@
     <button class="zoom-btn" onclick="zoomIn()">+</button>
     <button class="zoom-btn" onclick="zoomOut()">−</button>
     <button class="zoom-btn" onclick="fitMap(true)">⌂</button>
-    <button class="zoom-btn" onclick="geoLocate()" title="My Location">◎</button>
   </div>
 
   <div class="legend">
@@ -392,10 +417,12 @@
 </div>
 
 <div id="bottom-panel">
-  <div class="handle"></div>
-  <div class="tab-bar">
-    <button class="tab-btn active" id="tab-route" onclick="switchTab('route')">Route</button>
-    <button class="tab-btn" id="tab-list" onclick="switchTab('list')">Vendors</button>
+  <div class="handle" onclick="togglePanel()"></div>
+  <div id="panel-content">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-route" onclick="switchTab('route')">Route</button>
+      <button class="tab-btn" id="tab-list" onclick="switchTab('list')">Vendors</button>
+    </div>
   </div>
   <div id="panel-body">
     <div class="p-empty">
@@ -563,36 +590,6 @@ svg.addEventListener('click', (e) => {
   if (!e.target.classList.contains('node-hit')) closeTooltip();
 });
 
-// ── Current Location (GPS fallback) ─────────────────────────────
-function geoLocate() {
-  if (!navigator.geolocation) {
-    showToast('Geolocation not supported. Using your last tapped node.');
-    if (fromId) centerOnStart();
-    return;
-  }
-  navigator.geolocation.getCurrentPosition((pos) => {
-    showToast('GPS location used (not yet mapped to indoor map).');
-    if (fromId) centerOnStart();
-  }, () => {
-    showToast('GPS not available. Using your last tapped node.');
-    if (fromId) centerOnStart();
-  });
-}
-
-function centerOnStart() {
-  cancelAllMovement();
-  if (fromId && COORDS[fromId]) {
-    const { x, y } = COORDS[fromId];
-    const r = box.getBoundingClientRect();
-    if (!r.width) return;
-    px = r.width/2 - x * sc;
-    py = r.height/2 - y * sc;
-    applyTransform();
-    showToast('📍 Recentered on your location');
-  } else {
-    showToast('Set your location first');
-  }
-}
 
 // ── Markers ─────────────────────────────────────────────────────
 function setMarker(id, x, y) {
@@ -682,6 +679,7 @@ async function getDirections(destId) {
     if (!data.found) { showToast(data.error||'No route found.'); resetPanel(); return; }
     drawRoute(data);
     showSteps(data);
+    expandPanel();
     speakSteps(data.steps);
   } catch(e) {
     showToast('Network error — try again.'); resetPanel();
@@ -759,6 +757,7 @@ function clearRouteVisuals() {
   document.getElementById('nav-banner').classList.remove('on');
 }
 function clearRoute() {
+  collapsePanel();
   clearRouteVisuals();
   toId = null;
   resetPanel();
@@ -766,6 +765,7 @@ function clearRoute() {
   document.getElementById('hint-pill').classList.remove('gone');
 }
 function resetPanel() {
+  collapsePanel();
   document.getElementById('panel-body').innerHTML = `
     <div class="p-empty">
       <strong>Tap any stall to navigate</strong>
@@ -946,5 +946,18 @@ window.addEventListener('load', () => {
     setTimeout(centerWhenReady, 300);
   }
 });
+
+// ── Collapsible panel ────────────────────────────────────────
+const bottomPanel = document.getElementById('bottom-panel');
+
+function expandPanel() {
+  bottomPanel.classList.add('expanded');
+}
+function collapsePanel() {
+  bottomPanel.classList.remove('expanded');
+}
+function togglePanel() {
+  bottomPanel.classList.toggle('expanded');
+}
 </script>
 {% endblock %}
