@@ -1,0 +1,258 @@
+[
+  {
+    "model": "markets.market",
+    "pk": 2,
+    "fields": {
+      "name": "Test Market",
+      "slug": "test-market",
+      "city": "Abuja",
+      "state": "FCT",
+      "description": "A small test market for editing and routing validation.",
+      "address": "123 Test Lane",
+      "map_image": "",
+      "map_width": 1000,
+      "map_height": 1000,
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 10,
+    "fields": {
+      "market": 2,
+      "name": "Fresh Produce",
+      "code": "PRODUCE",
+      "description": "Fruits, vegetables, and grains.",
+      "color_hex": "#A9DFBF",
+      "created_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 11,
+    "fields": {
+      "market": 2,
+      "name": "Textiles & Fabrics",
+      "code": "TEXT",
+      "description": "Clothing and materials.",
+      "color_hex": "#AED6F1",
+      "created_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.zone",
+    "pk": 12,
+    "fields": {
+      "market": 2,
+      "name": "Electronics",
+      "code": "ELEC",
+      "description": "Gadgets and accessories.",
+      "color_hex": "#FAD7A0",
+      "created_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 101,
+    "fields": {
+      "market": 2,
+      "zone": null,
+      "qr_id": "bbbbbbbb-0001-0001-0001-bbbbbbbbbbbb",
+      "label": "Main Entrance",
+      "node_type": "entrance",
+      "x": 500.0,
+      "y": 950.0,
+      "qr_image": "",
+      "description": "Main gate.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 102,
+    "fields": {
+      "market": 2,
+      "zone": null,
+      "qr_id": "bbbbbbbb-0002-0002-0002-bbbbbbbbbbbb",
+      "label": "Central Junction",
+      "node_type": "intersection",
+      "x": 500.0,
+      "y": 750.0,
+      "qr_image": "",
+      "description": "Main crossing.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 103,
+    "fields": {
+      "market": 2,
+      "zone": null,
+      "qr_id": "bbbbbbbb-0003-0003-0003-bbbbbbbbbbbb",
+      "label": "North Junction",
+      "node_type": "intersection",
+      "x": 500.0,
+      "y": 550.0,
+      "qr_image": "",
+      "description": "Upper mid crossing.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 104,
+    "fields": {
+      "market": 2,
+      "zone": null,
+      "qr_id": "bbbbbbbb-0004-0004-0004-bbbbbbbbbbbb",
+      "label": "Top Junction",
+      "node_type": "intersection",
+      "x": 500.0,
+      "y": 350.0,
+      "qr_image": "",
+      "description": "Top of main aisle.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 201,
+    "fields": {
+      "market": 2,
+      "zone": 10,
+      "qr_id": "bbbbbbbb-0101-0101-0101-bbbbbbbbbbbb",
+      "label": "Produce Stall A",
+      "node_type": "stall",
+      "x": 300.0,
+      "y": 750.0,
+      "qr_image": "",
+      "description": "Fresh fruits and veggies.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 202,
+    "fields": {
+      "market": 2,
+      "zone": 10,
+      "qr_id": "bbbbbbbb-0202-0202-0202-bbbbbbbbbbbb",
+      "label": "Produce Stall B",
+      "node_type": "stall",
+      "x": 300.0,
+      "y": 550.0,
+      "qr_image": "",
+      "description": "Grains and spices.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 301,
+    "fields": {
+      "market": 2,
+      "zone": 11,
+      "qr_id": "bbbbbbbb-0301-0301-0301-bbbbbbbbbbbb",
+      "label": "Textile Stall A",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 750.0,
+      "qr_image": "",
+      "description": "Ankara and lace fabrics.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 302,
+    "fields": {
+      "market": 2,
+      "zone": 11,
+      "qr_id": "bbbbbbbb-0404-0404-0404-bbbbbbbbbbbb",
+      "label": "Textile Stall B",
+      "node_type": "stall",
+      "x": 700.0,
+      "y": 550.0,
+      "qr_image": "",
+      "description": "Ready‑made clothing.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.node",
+    "pk": 401,
+    "fields": {
+      "market": 2,
+      "zone": 12,
+      "qr_id": "bbbbbbbb-0505-0505-0505-bbbbbbbbbbbb",
+      "label": "Electronics Stall",
+      "node_type": "stall",
+      "x": 500.0,
+      "y": 150.0,
+      "qr_image": "",
+      "description": "Phones and chargers.",
+      "is_active": true,
+      "created_at": "2025-06-01T00:00:00Z",
+      "updated_at": "2025-06-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "markets.edge",
+    "pk": 201,
+    "fields": {"market": 2, "node_from": 101, "node_to": 102, "weight": 15.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 202,
+    "fields": {"market": 2, "node_from": 102, "node_to": 103, "weight": 15.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 203,
+    "fields": {"market": 2, "node_from": 103, "node_to": 104, "weight": 15.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 204,
+    "fields": {"market": 2, "node_from": 102, "node_to": 201, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 205,
+    "fields": {"market": 2, "node_from": 102, "node_to": 301, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 206,
+    "fields": {"market": 2, "node_from": 103, "node_to": 202, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 207,
+    "fields": {"market": 2, "node_from": 103, "node_to": 302, "weight": 20.0, "is_active": true}
+  },
+  {
+    "model": "markets.edge",
+    "pk": 208,
+    "fields": {"market": 2, "node_from": 104, "node_to": 401, "weight": 20.0, "is_active": true}
+  }
+]

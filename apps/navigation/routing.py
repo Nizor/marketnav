@@ -78,12 +78,11 @@ class MarketGraph:
 
         edges_qs = Edge.objects.filter(market=self.market, is_active=True)
         for e in edges_qs:
-            if e.node_from_id in self._adjacency and e.node_to_id in self._nodes:
-                self._adjacency[e.node_from_id].append((e.node_to_id, e.weight))
-                # Undirected: add reverse
-                if e.node_to_id in self._adjacency:
-                    self._adjacency[e.node_to_id].append((e.node_from_id, e.weight))
-
+            from_id = e.node_from_id
+            to_id = e.node_to_id
+            if from_id in self._nodes and to_id in self._nodes:
+                self._adjacency[from_id].append((to_id, e.weight))
+                self._adjacency[to_id].append((from_id, e.weight)) 
     # ------------------------------------------------------------------
     # Heuristic
     # ------------------------------------------------------------------

@@ -56,3 +56,23 @@ class MarketDetailSerializer(MarketSerializer):
 
     class Meta(MarketSerializer.Meta):
         fields = MarketSerializer.Meta.fields + ["nodes", "edges"]
+
+class NodeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Node
+        fields = ["label", "node_type", "zone", "x", "y"]
+
+class NodeUpdateCoordsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+    x = serializers.FloatField()
+    y = serializers.FloatField()
+
+class EdgeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Edge
+        fields = ["node_from", "node_to"]
+
+class EdgeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Edge
+        fields = ["id", "node_from", "node_to", "weight", "is_active"]

@@ -27,7 +27,7 @@ class Market(models.Model):
     address = models.TextField(blank=True)
 
     # Map image uploaded by admin (SVG or raster)
-    map_image = models.ImageField(
+    map_image = models.FileField(
         upload_to="maps/",
         blank=True,
         null=True,

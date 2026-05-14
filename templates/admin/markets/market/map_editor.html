@@ -1,0 +1,518 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+  /* Full‑screen map editor */
+  body { margin:0; padding:0; }
+  #content { padding:0; }
+  #map-container {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #1a1a2e;
+  }
+  #map-svg {
+    position: absolute; top:0; left:0;
+    width:100%; height:100%;
+    cursor: grab; user-select: none;
+  }
+  #map-svg:active { cursor: grabbing; }
+
+  /* Edge lines */
+  .edge-bg { stroke: rgba(255,255,255,0.07); stroke-width:14; stroke-linecap:round; }
+  .edge-edit { stroke: rgba(255,255,255,0.12); stroke-width:14; stroke-linecap:round; cursor: pointer; }
+  .edge-edit:hover { stroke: rgba(255,59,48,0.4); }
+
+  /* Node rendering */
+  .n-stall-bg    { fill: rgba(255,255,255,0.13); }
+  .n-junction-bg { fill: rgba(255,255,255,0.05); }
+  .n-entrance-bg { fill: rgba(46,204,113,0.2);   }
+  .n-stall-dot    { fill: rgba(255,255,255,0.55); }
+  .n-junction-dot { fill: rgba(255,255,255,0.22); }
+  .n-entrance-dot { fill: #2ECC71; }
+
+  .node-lbl {
+    font: 13px 'DM Sans', sans-serif; fill: rgba(255,255,255,0.45); pointer-events: none;
+  }
+
+  .node-hit {
+    fill: transparent; cursor: pointer;
+  }
+  .node-hit.dragging { cursor: grabbing; }
+
+  /* Controls */
+  .zoom-wrap {
+    position: absolute; top:12px; right:12px; z-index:20;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .zoom-btn {
+    width:38px; height:38px;
+    background:rgba(10,22,40,0.92); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.15); border-radius:8px;
+    color:#fff; font-size:1.3rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: background .15s;
+  }
+  .zoom-btn:hover { background: rgba(10,22,40,0.7); }
+
+  .legend {
+    position:absolute; top:12px; left:12px; z-index:20;
+    background:rgba(10,22,40,0.92); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.15); border-radius:8px;
+    padding:8px 12px; font-size:0.7rem; color:#ccc;
+    display:flex; flex-direction:column; gap:5px;
+  }
+  .li { display:flex; align-items:center; gap:7px; }
+  .ld { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+  /* Toolbar */
+  #toolbar {
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    z-index:25;
+    display:flex; gap:8px;
+    background:rgba(10,22,40,0.95); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:12px; padding:8px 12px;
+    color:#fff; font-size:0.85rem;
+  }
+  #toolbar button {
+    background:transparent; border:1px solid rgba(255,255,255,0.2);
+    color:#fff; border-radius:6px; padding:6px 12px;
+    font-size:0.8rem; cursor:pointer; transition:all .15s;
+  }
+  #toolbar button:hover { background:rgba(255,255,255,0.1); }
+  #toolbar button.active { background:var(--accent); border-color:var(--accent); color:#0A1628; font-weight:bold; }
+
+  /* Modal for node creation */
+  .modal-overlay {
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.6); z-index:100;
+    display:none; align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:#fff; border-radius:12px;
+    padding:20px; min-width:300px; max-width:400px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  }
+  .modal h3 { margin-top:0; }
+  .field { margin-bottom:12px; }
+  .field label { display:block; font-size:0.8rem; color:#333; margin-bottom:3px; }
+  .field input, .field select {
+    width:100%; padding:6px 8px; border:1px solid #ccc; border-radius:6px; font-size:0.9rem;
+  }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
+  .modal-actions button {
+    padding:8px 14px; border-radius:6px; border:none; cursor:pointer; font-size:0.85rem;
+  }
+  .btn-primary { background:var(--accent); color:#0A1628; font-weight:600; }
+  .btn-secondary { background:#eee; color:#333; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="map-container">
+  <svg id="map-svg" viewBox="0 0 {{ market.map_width }} {{ market.map_height }}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M60 0L0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+
+    <!-- Map image background (if uploaded) -->
+    {% if market.map_image %}
+    <image href="{{ market.map_image.url }}" width="{{ market.map_width }}" height="{{ market.map_height }}" 
+           xmlns:xlink="http://www.w3.org/1999/xlink" />
+    {% endif %}
+
+    <!-- Edges -->
+    <g id="edges-layer">
+      {% for e in edges %}
+        <line class="edge-edit" data-id="{{ e.id }}"
+              x1="{{ e.node_from.x }}" y1="{{ e.node_from.y }}"
+              x2="{{ e.node_to.x }}" y2="{{ e.node_to.y }}"
+              onclick="deleteEdge({{ e.id }})" />
+      {% endfor %}
+    </g>
+
+    <!-- Nodes -->
+    <g id="nodes-layer">
+      {% for n in nodes %}
+      <g class="node-group" data-id="{{ n.id }}" data-label="{{ n.label }}" data-type="{{ n.node_type }}" 
+         data-zone="{{ n.zone.id|default:'' }}" data-x="{{ n.x }}" data-y="{{ n.y }}">
+        {% if n.node_type == 'intersection' %}
+          <circle class="n-junction-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="9"/>
+          <circle class="n-junction-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="4"/>
+        {% elif n.node_type == 'entrance' or n.node_type == 'exit' %}
+          <circle class="n-entrance-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="16"/>
+          <circle class="n-entrance-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="8"/>
+        {% else %}
+          <circle class="n-stall-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="14"/>
+          <circle class="n-stall-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="7"/>
+        {% endif %}
+        <text class="node-lbl" x="{{ n.x }}" y="{{ n.y|add:30 }}" text-anchor="middle">{{ n.label }}</text>
+        <circle class="node-hit" cx="{{ n.x }}" cy="{{ n.y }}" r="30" />
+      </g>
+      {% endfor %}
+    </g>
+  </svg>
+
+  <div class="zoom-wrap">
+    <button class="zoom-btn" onclick="zm(1.3)">+</button>
+    <button class="zoom-btn" onclick="zm(0.77)">−</button>
+  </div>
+
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#2ECC71"></div>Entrance</div>
+    <div class="li"><div class="ld" style="background:rgba(255,255,255,0.55)"></div>Stall</div>
+    <div class="li"><div class="ld" style="background:rgba(255,255,255,0.22)"></div>Intersection</div>
+  </div>
+
+  <div id="toolbar">
+    <button id="btn-add-node" class="active">+ Add Node</button>
+    <button id="btn-add-edge" onclick="toggleEdgeMode()">🔗 Connect</button>
+    <span style="margin-left:12px;color:#ccc;font-size:0.8rem;display:flex;align-items:center">
+      Drag nodes to move · Click edge to delete
+    </span>
+  </div>
+</div>
+
+<!-- Node creation modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>New Node</h3>
+    <div class="field">
+      <label>Label</label>
+      <input id="node-label" type="text" placeholder="e.g. Stall 25">
+    </div>
+    <div class="field">
+      <label>Type</label>
+      <select id="node-type">
+        <option value="stall">Stall</option>
+        <option value="intersection">Intersection</option>
+        <option value="entrance">Entrance</option>
+        <option value="exit">Exit</option>
+        <option value="amenity">Amenity</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Zone</label>
+      <select id="node-zone">
+        <option value="">None</option>
+        {% for zone in zones %}
+        <option value="{{ zone.id }}">{{ zone.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmAddNode()">Create</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // –– SVG pan/zoom –– (same as existing map)
+  const svg = document.getElementById('map-svg');
+  const box = document.getElementById('map-container');
+  let sc = 1, px = 0, py = 0, drag = false, mx = 0, my = 0, moved = false;
+  const MAP_W = {{ market.map_width }}, MAP_H = {{ market.map_height }};
+
+  function apply() {
+    const r = box.getBoundingClientRect();
+    px = Math.max(r.width  - MAP_W*sc - r.width*.5,  Math.min(r.width*.5,  px));
+    py = Math.max(r.height - MAP_H*sc - r.height*.5, Math.min(r.height*.5, py));
+    svg.style.transform = `translate(${px}px,${py}px) scale(${sc})`;
+    svg.style.transformOrigin = '0 0';
+  }
+  function zm(f, cx, cy) {
+    const r = box.getBoundingClientRect();
+    cx = cx ?? r.width/2; cy = cy ?? r.height/2;
+    const ns = Math.max(.3, Math.min(7, sc*f));
+    px = cx-(cx-px)*(ns/sc); py = cy-(cy-py)*(ns/sc);
+    sc = ns; apply();
+  }
+  function fit() {
+    const r = box.getBoundingClientRect();
+    sc = Math.min(r.width/MAP_W, r.height/MAP_H) * .9;
+    px = (r.width - MAP_W*sc)/2; py = (r.height - MAP_H*sc)/2; apply();
+  }
+
+  // Mouse/touch pan/zoom (simplified)
+  svg.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('node-hit')) return;
+    drag = true; moved = false; mx = e.clientX; my = e.clientY;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    if (Math.abs(e.clientX-mx)+Math.abs(e.clientY-my)>3) moved = true;
+    px += e.clientX-mx; py += e.clientY-my; mx = e.clientX; my = e.clientY; apply();
+  });
+  window.addEventListener('mouseup', () => drag = false);
+  box.addEventListener('wheel', e => {
+    e.preventDefault();
+    const r = box.getBoundingClientRect();
+    zm(e.deltaY<0?1.15:.87, e.clientX-r.left, e.clientY-r.top);
+  }, {passive:false});
+  window.addEventListener('load', fit);
+  window.addEventListener('resize', fit);
+
+  // –– Node dragging ––
+  let activeNode = null;
+  let origX = 0, origY = 0;
+  let dragData = new Map();
+
+  document.querySelectorAll('.node-hit').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      const group = el.closest('.node-group');
+      activeNode = group;
+      origX = parseFloat(group.dataset.x);
+      origY = parseFloat(group.dataset.y);
+      drag = false; moved = false;
+      group.classList.add('dragging');
+      e.stopPropagation();
+    });
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!activeNode) return;
+    const r = svg.getBoundingClientRect();
+    const mouseX = (e.clientX - r.left - px) / sc;
+    const mouseY = (e.clientY - r.top  - py) / sc;
+    const x = Math.min(MAP_W, Math.max(0, Math.round(mouseX)));
+    const y = Math.min(MAP_H, Math.max(0, Math.round(mouseY)));
+    // Update node visual position
+    const circles = activeNode.querySelectorAll('circle:not(.node-hit)');
+    const text = activeNode.querySelector('text');
+    circles.forEach(c => { c.setAttribute('cx', x); c.setAttribute('cy', y); });
+    if (text) { text.setAttribute('x', x); text.setAttribute('y', y+30); }
+    activeNode.dataset.x = x;
+    activeNode.dataset.y = y;
+    activeNode.querySelector('.node-hit').setAttribute('cx', x);
+    activeNode.querySelector('.node-hit').setAttribute('cy', y);
+    // Record drag data
+    dragData.set(activeNode.dataset.id, {x, y});
+    moved = true;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (activeNode) {
+      activeNode.classList.remove('dragging');
+      if (moved) {
+        // Save positions (batch)
+        saveNodePositions();
+      }
+      activeNode = null;
+    }
+  });
+
+  async function saveNodePositions() {
+    const nodes = Array.from(dragData.entries()).map(([id, coords]) => ({id: parseInt(id), ...coords}));
+    if (!nodes.length) return;
+    try {
+      await fetch('{% url "node-update-coords" market.slug %}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({nodes})
+      });
+      dragData.clear();
+    } catch(e) { console.error(e); }
+  }
+
+  // –– Adding nodes ––
+  let addingNode = false;
+  document.getElementById('btn-add-node').addEventListener('click', function() {
+    addingNode = !addingNode;
+    this.classList.toggle('active', addingNode);
+    document.getElementById('btn-add-edge').classList.remove('active');
+    activeNode = null; // reset edge mode
+    document.getElementById('modal').classList.remove('open');
+  });
+
+  svg.addEventListener('click', e => {
+    if (!addingNode || e.target.closest('.node-group')) return;
+    const r = svg.getBoundingClientRect();
+    const x = (e.clientX - r.left - px) / sc;
+    const y = (e.clientY - r.top  - py) / sc;
+    // Open modal with coordinates
+    document.getElementById('modal').dataset.x = Math.round(x);
+    document.getElementById('modal').dataset.y = Math.round(y);
+    document.getElementById('modal').classList.add('open');
+  });
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  async function confirmAddNode() {
+    const x = parseInt(document.getElementById('modal').dataset.x);
+    const y = parseInt(document.getElementById('modal').dataset.y);
+    const label = document.getElementById('node-label').value || 'New Node';
+    const nodeType = document.getElementById('node-type').value;
+    const zoneId = document.getElementById('node-zone').value || null;
+    const data = { label, node_type: nodeType, zone: zoneId, x, y };
+    try {
+      const resp = await fetch('{% url "node-create" market.slug %}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify(data)
+      });
+      if (!resp.ok) { alert('Error creating node'); return; }
+      const nodeData = await resp.json();
+      // Add node to SVG
+      addNodeToMap(nodeData);
+      closeModal();
+      // Reset modal fields
+      document.getElementById('node-label').value = '';
+    } catch(e) { console.error(e); }
+  }
+
+  function addNodeToMap(data) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    g.classList.add('node-group');
+    g.dataset.id = data.id;
+    g.dataset.label = data.label;
+    g.dataset.type = data.node_type;
+    g.dataset.zone = data.zone || '';
+    g.dataset.x = data.x;
+    g.dataset.y = data.y;
+    // Circles based on type
+    let circle1, circle2;
+    if (data.node_type === 'intersection') {
+      circle1 = createCircle(9, 'n-junction-bg');
+      circle2 = createCircle(4, 'n-junction-dot');
+    } else if (data.node_type === 'entrance' || data.node_type === 'exit') {
+      circle1 = createCircle(16, 'n-entrance-bg');
+      circle2 = createCircle(8, 'n-entrance-dot');
+    } else {
+      circle1 = createCircle(14, 'n-stall-bg');
+      circle2 = createCircle(7, 'n-stall-dot');
+    }
+    g.appendChild(circle1);
+    g.appendChild(circle2);
+    // Label
+    const text = document.createElementNS(ns, 'text');
+    text.classList.add('node-lbl');
+    text.setAttribute('x', data.x);
+    text.setAttribute('y', data.y+30);
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = data.label;
+    g.appendChild(text);
+    // Hit area
+    const hit = createCircle(30, 'node-hit');
+    g.appendChild(hit);
+    document.getElementById('nodes-layer').appendChild(g);
+    // Add drag listeners
+    hit.addEventListener('mousedown', dragStart);
+  }
+
+  function createCircle(r, cls) {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.classList.add(cls);
+    c.setAttribute('cx', 0);  // will be set later
+    c.setAttribute('cy', 0);
+    c.setAttribute('r', r);
+    return c;
+  }
+
+  function dragStart(e) {
+    // ... similar logic as before ...
+  }
+
+  // –– Edge creation/deletion ––
+  let edgeMode = false;
+  function toggleEdgeMode() {
+    edgeMode = !edgeMode;
+    document.getElementById('btn-add-edge').classList.toggle('active', edgeMode);
+    document.getElementById('btn-add-node').classList.remove('active');
+    addingNode = false;
+  }
+
+  let edgeFromNode = null;
+  // Modify node-hit click handler to detect edge mode
+  document.querySelectorAll('.node-hit').forEach(el => {
+    el.addEventListener('click', e => {
+      if (!edgeMode) return;
+      const group = el.closest('.node-group');
+      if (!edgeFromNode) {
+        edgeFromNode = group;
+        group.style.outline = '2px solid #FF3B30';
+      } else if (edgeFromNode !== group) {
+        createEdge(edgeFromNode.dataset.id, group.dataset.id);
+        edgeFromNode.style.outline = '';
+        edgeFromNode = null;
+      } else {
+        edgeFromNode.style.outline = '';
+        edgeFromNode = null;
+      }
+      e.stopPropagation();
+    });
+  });
+
+  async function createEdge(fromId, toId) {
+    try {
+      const resp = await fetch('{% url "edge-create" market.slug %}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({node_from: parseInt(fromId), node_to: parseInt(toId)})
+      });
+      if (!resp.ok) return;
+      const edge = await resp.json();
+      // Draw new edge line
+      drawEdge(edge);
+    } catch(e) { console.error(e); }
+  }
+
+  function drawEdge(edge) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const line = document.createElementNS(ns, 'line');
+    line.classList.add('edge-edit');
+    line.dataset.id = edge.id;
+    const fromNode = document.querySelector(`.node-group[data-id='${edge.node_from}']`);
+    const toNode   = document.querySelector(`.node-group[data-id='${edge.node_to}']`);
+    const x1 = fromNode ? fromNode.dataset.x : 0;
+    const y1 = fromNode ? fromNode.dataset.y : 0;
+    const x2 = toNode   ? toNode.dataset.x : 0;
+    const y2 = toNode   ? toNode.dataset.y : 0;
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.onclick = function() { deleteEdge(edge.id); };
+    document.getElementById('edges-layer').appendChild(line);
+  }
+
+  async function deleteEdge(id) {
+    if (!confirm('Delete this path?')) return;
+    try {
+      await fetch(`/api/v1/markets/{{ market.slug }}/edges/${id}/`, {
+        method: 'DELETE',
+        headers: {'X-CSRFToken': getCookie('csrftoken')}
+      });
+      // Remove from SVG
+      const line = document.querySelector(`.edge-edit[data-id='${id}']`);
+      if (line) line.remove();
+    } catch(e) { console.error(e); }
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock %}

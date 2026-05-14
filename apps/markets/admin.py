@@ -12,7 +12,9 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.core.files.base import ContentFile
 from django.conf import settings
-
+from django.urls import path 
+from django.shortcuts import redirect
+from django.utils.html import format_html
 from .models import Market, Zone, Node, Edge
 
 
@@ -79,6 +81,38 @@ class MarketAdmin(admin.ModelAdmin):
             )
         return "No map uploaded."
     map_preview.short_description = "Map Preview"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<path:object_id>/map-editor/",
+                self.admin_site.admin_view(self.map_editor_view),
+                name="map_editor",
+            ),
+        ]
+        return custom_urls + urls
+    
+    def map_editor_view(self, request, object_id):
+        from django.shortcuts import get_object_or_404, render
+        from .models import Market, Node, Edge, Zone
+        market = get_object_or_404(Market, pk=object_id)
+        zones = Zone.objects.filter(market=market)
+        nodes = Node.objects.filter(market=market, is_active=True).select_related("zone")
+        edges = Edge.objects.filter(market=market, is_active=True).select_related("node_from", "node_to")
+        context = {
+            'title': f"Map Editor for {market.name}",
+            'market': market,
+            'zones': zones,
+            'nodes': nodes,
+            'edges': edges,
+            'opts': market._meta,
+            'original': market,
+            'has_change_permission': self.has_change_permission(request, market),
+            'site_url': self.admin_site.name,
+        }
+        return render(request, "admin/markets/market/map_editor.html", context)
+    change_form_template = "admin/markets/market/change_form.html"
 
 
 @admin.register(Zone)

@@ -1,5 +1,5 @@
 """
-apps/navigation/views.py  (Phase 2 - full web + API views)
+apps/navigation/views.py
 """
 
 from rest_framework.views import APIView
@@ -11,11 +11,13 @@ from django.db.models import Q
 from apps.markets.models import Market, Node, Edge
 from apps.vendors.models import Vendor, ProductCategory
 from apps.vendors.serializers import VendorListSerializer
+from rest_framework.permissions import AllowAny
 
 
 # ── API Views ────────────────────────────────────────────────────────
 
 class RouteView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         market_slug = request.data.get("market_slug")
         from_id     = request.data.get("from_node_id")
@@ -37,6 +39,7 @@ class RouteView(APIView):
 
 
 class SearchAPIView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         query       = request.query_params.get("q", "").strip()
         market_slug = request.query_params.get("market", "").strip()
