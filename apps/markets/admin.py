@@ -13,7 +13,7 @@ from django.utils.html import format_html
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.urls import path 
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, render
 from django.utils.html import format_html
 from .models import Market, Zone, Node, Edge
 
@@ -113,6 +113,34 @@ class MarketAdmin(admin.ModelAdmin):
         }
         return render(request, "admin/markets/market/map_editor.html", context)
     change_form_template = "admin/markets/market/change_form.html"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/map-editor/',
+                self.admin_site.admin_view(self.map_editor_view),
+                name='map_editor',
+            ),
+        ]
+        return custom_urls + urls
+
+    def map_editor_view(self, request, object_id):
+        market = get_object_or_404(Market, pk=object_id)
+        zones = Zone.objects.filter(market=market)
+        nodes = Node.objects.filter(market=market, is_active=True).select_related('zone')
+        edges = Edge.objects.filter(market=market, is_active=True)   # still shown, but not editable
+        context = {
+            'title': f'Quick Place – {market.name}',
+            'market': market,
+            'zones': zones,
+            'nodes': nodes,
+            'edges': edges,
+            'opts': market._meta,
+            'original': market,
+            'has_change_permission': self.has_change_permission(request, market),
+        }
+        return render(request, 'admin/markets/market/quick_place.html', context)
 
 
 @admin.register(Zone)

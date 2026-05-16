@@ -664,11 +664,12 @@ function setStart(id) {
 // ── Directions ──────────────────────────────────────────────────
 async function getDirections(destId) {
   if (!fromId) { showToast('Set your location first.'); return; }
-  if (destId===fromId) { showToast('Choose a different stall.'); return; }
+  if (destId === fromId) { showToast('Choose a different stall.'); return; }
   toId = destId;
   closeTooltip();
   document.getElementById('panel-body').innerHTML =
     '<div class="p-empty"><div class="spinner" style="margin:0 auto 10px"></div>Calculating route…</div>';
+
   try {
     const res = await fetch('/api/v1/navigation/route/', {
       method: 'POST',
@@ -677,12 +678,23 @@ async function getDirections(destId) {
     });
     const data = await res.json();
     if (!data.found) { showToast(data.error||'No route found.'); resetPanel(); return; }
+
+    // Draw the route line on the map
     drawRoute(data);
-    showSteps(data);
-    expandPanel();
-    speakSteps(data.steps);
+
+    // Fit the map so the whole route is visible
+    fitMap();
+
+    // Show a brief confirmation toast (instead of the steps panel)
+    const destLabel = data.node_labels[data.node_labels.length-1];
+    showToast(`🧭 Route to ${destLabel} · ${data.distance}m · ${data.steps.length} turns`);
+
+    // Reset the bottom panel to its empty state (will stay collapsed)
+    resetPanel();
+
   } catch(e) {
-    showToast('Network error — try again.'); resetPanel();
+    showToast('Network error — try again.');
+    resetPanel();
   }
 }
 function drawRoute(data) {
@@ -735,15 +747,6 @@ function startNav(dest, start, dist) {
   showToast(`🧭 Follow the blue line to ${dest}`);
   document.getElementById('bottom-panel').scrollTop = 0;
   fitMap();
-}
-
-// ── Voice Guidance ──────────────────────────────────────────────
-function speakSteps(steps) {
-  if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(steps.join('. '));
-  utterance.rate = 0.9;
-  speechSynthesis.speak(utterance);
 }
 
 // ── Clear route ─────────────────────────────────────────────────

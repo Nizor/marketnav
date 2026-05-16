@@ -1,0 +1,296 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+  body { margin:0; padding:0; }
+  #content { padding:0; }
+
+  #map-container {
+    width: 100vw; height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: #1a1a2e;
+    touch-action: none;
+  }
+
+  #map-svg {
+    position: absolute; top:0; left:0;
+    width:100%; height:100%;
+  }
+
+  /* Edges (read-only, visible) */
+  .edge-bg {
+    stroke: rgba(255,255,255,0.12);
+    stroke-width: 10;
+    stroke-linecap: round;
+  }
+
+  /* Node rendering – simple, clear */
+  .n-stall-bg    { fill: rgba(255,255,255,0.13); }
+  .n-junction-bg { fill: rgba(255,255,255,0.05); }
+  .n-entrance-bg { fill: rgba(46,204,113,0.2);   }
+
+  .n-stall-dot    { fill: rgba(255,255,255,0.55); }
+  .n-junction-dot { fill: rgba(255,255,255,0.22); }
+  .n-entrance-dot { fill: #2ECC71; }
+
+  .node-lbl {
+    font: 13px 'DM Sans', sans-serif;
+    fill: rgba(255,255,255,0.45);
+    pointer-events: none;
+  }
+
+  /* Click anywhere to add – no hit targets needed */
+  #map-svg {
+    cursor: crosshair;
+  }
+
+  /* Toolbar */
+  #toolbar {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 25;
+    display: flex; gap: 8px;
+    background: rgba(10,22,40,0.95); backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 8px 12px;
+    color: #fff; font-size: 0.85rem;
+    align-items: center;
+  }
+
+  #toolbar select, #toolbar input {
+    background: transparent; border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; border-radius: 6px; padding: 6px 8px;
+    font-size: 0.8rem; font-family: inherit;
+    margin-right: 6px;
+  }
+
+  #toolbar button {
+    background: #2ecc71; border: none; color: #fff;
+    border-radius: 6px; padding: 6px 14px;
+    font-size: 0.8rem; cursor: pointer;
+    font-weight: bold;
+  }
+  #toolbar button:hover { background: #27ae60; }
+
+  #status {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 25;
+    background: rgba(10,22,40,0.8); color: #fff;
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem;
+    display: none;
+  }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div id="map-container">
+  <svg id="map-svg" viewBox="0 0 {{ market.map_width }} {{ market.map_height }}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M60 0L0 0 0 60" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid)"/>
+
+    {% if market.map_image %}
+    <image href="{{ market.map_image.url }}" width="{{ market.map_width }}" height="{{ market.map_height }}"
+           preserveAspectRatio="xMidYMid meet" style="pointer-events: none;" />
+    {% endif %}
+
+    <!-- Existing edges (read-only) -->
+    <g>
+      {% for e in edges %}
+        <line class="edge-bg" x1="{{ e.node_from.x }}" y1="{{ e.node_from.y }}" x2="{{ e.node_to.x }}" y2="{{ e.node_to.y }}"/>
+      {% endfor %}
+    </g>
+
+    <!-- Existing nodes -->
+    <g id="nodes-layer">
+      {% for n in nodes %}
+      <g data-id="{{ n.id }}" data-label="{{ n.label }}" data-type="{{ n.node_type }}"
+         data-x="{{ n.x }}" data-y="{{ n.y }}" data-zone="{{ n.zone.id|default:'' }}">
+        {% if n.node_type == 'intersection' %}
+          <circle class="n-junction-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="9"/>
+          <circle class="n-junction-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="4"/>
+        {% elif n.node_type == 'entrance' or n.node_type == 'exit' %}
+          <circle class="n-entrance-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="16"/>
+          <circle class="n-entrance-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="8"/>
+        {% else %}
+          <circle class="n-stall-bg" cx="{{ n.x }}" cy="{{ n.y }}" r="14"/>
+          <circle class="n-stall-dot" cx="{{ n.x }}" cy="{{ n.y }}" r="7"/>
+        {% endif %}
+        <text class="node-lbl" x="{{ n.x }}" y="{{ n.y|add:30 }}" text-anchor="middle">{{ n.label }}</text>
+      </g>
+      {% endfor %}
+    </g>
+  </svg>
+
+  <div id="status"></div>
+
+  <div id="toolbar">
+    <label style="color:#ccc;">Label:</label>
+    <input type="text" id="new-label" placeholder="e.g. Stall 25" value="">
+    <label style="color:#ccc;">Type:</label>
+    <select id="new-type">
+      <option value="stall">Stall</option>
+      <option value="intersection">Intersection</option>
+      <option value="entrance">Entrance</option>
+      <option value="exit">Exit</option>
+      <option value="amenity">Amenity</option>
+    </select>
+    <label style="color:#ccc;">Zone:</label>
+    <select id="new-zone">
+      <option value="">None</option>
+      {% for zone in zones %}
+        <option value="{{ zone.id }}">{{ zone.name }}</option>
+      {% endfor %}
+    </select>
+    <button onclick="addNode()">Place Node</button>
+    <span style="margin-left:12px;color:#ccc;font-size:0.8rem">Click anywhere on the map to place.</span>
+  </div>
+</div>
+
+<script>
+  const svg = document.getElementById('map-svg');
+  const box = document.getElementById('map-container');
+  const MAP_W = {{ market.map_width }};
+  const MAP_H = {{ market.map_height }};
+
+  // Simple pan/zoom (no node dragging)
+  let sc = 1, px = 0, py = 0;
+  function apply() {
+    svg.style.transform = `translate(${px}px,${py}px) scale(${sc})`;
+    svg.style.transformOrigin = '0 0';
+  }
+  function fit() {
+    const r = box.getBoundingClientRect();
+    sc = Math.min(r.width / MAP_W, r.height / MAP_H) * 0.9;
+    px = (r.width - MAP_W*sc)/2;
+    py = (r.height - MAP_H*sc)/2;
+    apply();
+  }
+  window.addEventListener('load', fit);
+  window.addEventListener('resize', fit);
+
+  // Panning
+  let drag = false, mx = 0, my = 0;
+  svg.addEventListener('mousedown', e => {
+    drag = true; mx = e.clientX; my = e.clientY;
+  });
+  window.addEventListener('mousemove', e => {
+    if (!drag) return;
+    px += e.clientX - mx; py += e.clientY - my;
+    mx = e.clientX; my = e.clientY;
+    apply();
+  });
+  window.addEventListener('mouseup', () => drag = false);
+
+  // Click to place node
+  svg.addEventListener('click', e => {
+    if (e.target.closest('.node-hit')) return; // ignore clicks on nodes
+    const r = svg.getBoundingClientRect();
+    const x = (e.clientX - r.left - px) / sc;
+    const y = (e.clientY - r.top - py) / sc;
+    placeNodeAt(Math.round(x), Math.round(y));
+  });
+
+  function placeNodeAt(x, y) {
+    const label = document.getElementById('new-label').value.trim() || 'Node';
+    const type = document.getElementById('new-type').value;
+    const zone = document.getElementById('new-zone').value || null;
+
+    fetch('{% url "node-create" market.slug %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ label, node_type: type, zone, x, y })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.id) {
+        // Append new node to SVG
+        addNodeToSVG(data);
+        showStatus(`✓ ${data.label} added`);
+        // Clear label input for next node
+        document.getElementById('new-label').value = '';
+      } else {
+        showStatus('Error adding node', true);
+      }
+    })
+    .catch(() => showStatus('Network error', true));
+  }
+
+  function addNodeToSVG(data) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(ns, 'g');
+    g.dataset.id = data.id;
+    g.dataset.label = data.label;
+    g.dataset.type = data.node_type;
+    g.dataset.zone = data.zone || '';
+    g.dataset.x = data.x;
+    g.dataset.y = data.y;
+
+    let circle1, circle2;
+    if (data.node_type === 'intersection') {
+      circle1 = createCircle(9, 'n-junction-bg');
+      circle2 = createCircle(4, 'n-junction-dot');
+    } else if (data.node_type === 'entrance' || data.node_type === 'exit') {
+      circle1 = createCircle(16, 'n-entrance-bg');
+      circle2 = createCircle(8, 'n-entrance-dot');
+    } else {
+      circle1 = createCircle(14, 'n-stall-bg');
+      circle2 = createCircle(7, 'n-stall-dot');
+    }
+    circle1.setAttribute('cx', data.x); circle1.setAttribute('cy', data.y);
+    circle2.setAttribute('cx', data.x); circle2.setAttribute('cy', data.y);
+    g.appendChild(circle1);
+    g.appendChild(circle2);
+
+    const text = document.createElementNS(ns, 'text');
+    text.classList.add('node-lbl');
+    text.setAttribute('x', data.x);
+    text.setAttribute('y', data.y + 30);
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = data.label;
+    g.appendChild(text);
+
+    document.getElementById('nodes-layer').appendChild(g);
+  }
+
+  function createCircle(r, cls) {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.classList.add(cls);
+    c.setAttribute('r', r);
+    return c;
+  }
+
+  function showStatus(msg, isError = false) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.background = isError ? 'rgba(231,76,60,0.9)' : 'rgba(46,204,113,0.9)';
+    setTimeout(() => el.style.display = 'none', 2000);
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock %}
